@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "1.0",
+  "_note": "Universal API payload. This is the ONE shape every partner bank routes to Able AI. Design mockups and the logic engine both read this file. Owner of the contract: Product & Design (Anton). Owner of the engine that consumes it: Builder (Priya).",
+  "partner": {
+    "partnerId": "demo-bank",
+    "displayName": "Demo Bank",
+    "consentGrantedAt": "2026-08-20T09:12:00Z",
+    "scopes": ["accounts:read", "transactions:read"]
+  },
+  "profiles": [
+    {
+      "userId": "u_maya",
+      "displayName": "Maya",
+      "age": 23,
+      "ageBand": "18-25",
+      "persona": "young_professional",
+      "accounts": [
+        { "accountId": "acc_maya_current", "type": "current", "balance": 1284.5, "currency": "GBP" },
+        { "accountId": "acc_maya_savings", "type": "savings", "balance": 640.0, "currency": "GBP" }
+      ],
+      "income": { "monthlyNet": 1980.0, "paydayDayOfMonth": 25, "confidence": "high" },
+      "spending": {
+        "monthlyTotal": 1642.0,
+        "categories": [
+          { "categoryId": "rent",        "label": "Rent & bills",     "monthly": 950.0, "discretionary": false },
+          { "categoryId": "groceries",   "label": "Groceries",        "monthly": 210.0, "discretionary": false },
+          { "categoryId": "transport",   "label": "Transport",        "monthly": 96.0,  "discretionary": false },
+          { "categoryId": "eating_out",  "label": "Eating out",       "monthly": 168.0, "discretionary": true },
+          { "categoryId": "coffee",      "label": "Coffee & snacks",  "monthly": 72.0,  "discretionary": true },
+          { "categoryId": "subs",        "label": "Subscriptions",    "monthly": 46.0,  "discretionary": true },
+          { "categoryId": "shopping",    "label": "Shopping",         "monthly": 100.0, "discretionary": true }
+        ]
+      },
+      "savings": { "monthlyAverage": 152.0, "currentSaved": 640.0 },
+      "goals": [
+        {
+          "goalId": "g_deposit",
+          "label": "Deposit fund",
+          "emoji": "🔑",
+          "targetAmount": 3000.0,
+          "saved": 640.0,
+          "idealTimeframeMonths": 12,
+          "createdAt": "2026-05-02T00:00:00Z"
+        }
+      ],
+      "points": { "balance": 140, "lifetime": 340, "lastGoalRewardAt": "2026-07-14" }
+    },
+    {
+      "userId": "u_jayden",
+      "displayName": "Jayden",
+      "age": 16,
+      "ageBand": "15-18",
+      "persona": "secondary_school",
+      "accounts": [
+        { "accountId": "acc_jayden_current", "type": "current", "balance": 86.4, "currency": "GBP" }
+      ],
+      "income": { "monthlyNet": 120.0, "paydayDayOfMonth": 1, "confidence": "medium", "sources": ["part_time", "allowance"] },
+      "spending": {
+        "monthlyTotal": 74.0,
+        "categories": [
+          { "categoryId": "transport",  "label": "Bus & travel",     "monthly": 22.0, "discretionary": false },
+          { "categoryId": "lunch",      "label": "Lunch & snacks",   "monthly": 28.0, "discretionary": true },
+          { "categoryId": "gaming",     "label": "Games & in-app",   "monthly": 14.0, "discretionary": true },
+          { "categoryId": "subs",       "label": "Subscriptions",    "monthly": 10.0, "discretionary": true }
+        ]
+      },
+      "savings": { "monthlyAverage": 46.0, "currentSaved": 62.0 },
+      "goals": [
+        {
+          "goalId": "g_boots",
+          "label": "Match boots",
+          "emoji": "⚽",
+          "targetAmount": 220.0,
+          "saved": 62.0,
+          "idealTimeframeMonths": 3,
+          "createdAt": "2026-07-18T00:00:00Z"
+        }
+      ],
+      "points": { "balance": 60, "lifetime": 60, "lastGoalRewardAt": null }
+    }
+  ],
+  "habitLibrary": [
+    { "habitId": "h_coffee",    "label": "Skip 3 coffees this week",        "categoryId": "coffee",     "weeklySaving": 10.5, "points": 10, "personas": ["young_professional"] },
+    { "habitId": "h_lunch",     "label": "Pack lunch 2 days",               "categoryId": "eating_out", "weeklySaving": 14.0, "points": 15, "personas": ["young_professional"] },
+    { "habitId": "h_subs",      "label": "Cancel one unused subscription",  "categoryId": "subs",       "weeklySaving": 2.75, "points": 20, "personas": ["young_professional", "secondary_school"] },
+    { "habitId": "h_walk",      "label": "Walk 2 journeys instead of tap in","categoryId": "transport", "weeklySaving": 5.6,  "points": 10, "personas": ["young_professional", "secondary_school"] },
+    { "habitId": "h_snacks",    "label": "Snack budget: 3 days at school",  "categoryId": "lunch",      "weeklySaving": 4.5,  "points": 10, "personas": ["secondary_school"] },
+    { "habitId": "h_gaming",    "label": "No in-game top-ups this week",    "categoryId": "gaming",     "weeklySaving": 3.25, "points": 15, "personas": ["secondary_school"] }
+  ],
+  "rewardRules": {
+    "goalCompletionPoints": 100,
+    "goalRewardCapPerMonth": 1,
+    "pointsToRewardTiers": [
+      { "points": 250,  "reward": "£5 credit",  "fundedBy": "partner_education_budget" },
+      { "points": 600,  "reward": "£15 credit", "fundedBy": "partner_education_budget" },
+      { "points": 1200, "reward": "£40 credit", "fundedBy": "partner_education_budget" }
+    ]
+  }
+}

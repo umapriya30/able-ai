@@ -1,23 +1,37 @@
-### AL ###
-#Template for AL projects for Dynamics 365 Business Central
-#launch.json folder
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows / Linux desktop
+Thumbs.db
+desktop.ini
+.directory
+
+# Editors
 .vscode/
-#Cache folder
-.alcache/
-#Symbols folder
-.alpackages/
-#Snapshots folder
-.snapshots/
-#Testing Output folder
-.output/
-#Extension App-file
-*.app
-#Rapid Application Development File
-rad.json
-#Translation Base-file
-*.g.xlf
-#License-files
-*.bclicense
-*.flf
-#Test results file
-TestResults.xml
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code — keep CLAUDE.md, .claude/agents/ and .claude/launch.json in the repo
+# (the team shares those); ignore only per-machine settings and local state.
+.claude/settings.local.json
+.claude/*.local.md
+
+# The prototype is deliberately buildless and offline — nothing here should ever
+# need node_modules. This is only a guard against `npx serve` and friends
+# leaving artefacts behind in the repo.
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-error.log*
+.npm/
+
+# Scratch
+*.log
+tmp/
+scratch/
+*.original.md

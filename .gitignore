@@ -30,6 +30,17 @@ npm-debug.log*
 yarn-error.log*
 .npm/
 
+# Python backend
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Next.js frontend
+.next/
+*.tsbuildinfo
+next-env.d.ts
+
 # Scratch
 *.log
 tmp/

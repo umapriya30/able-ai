@@ -1,7 +1,7 @@
 # Able AI — Product & Design
 
 Turning little habits into big benefits.
-Deliverables for the Work in Fintech AI Summit hackathon, 28 Aug 2026. Owner: Anton (Product & Design).
+Deliverables for the Work in Fintech AI Summit hackathon, 28 Aug 2026.
 
 ## Start here
 
@@ -16,6 +16,24 @@ docs/05-risks-and-challenges.md  Challenges to the product, raised for the team
 backend/                      FastAPI service — serves the payload contract and habit/AI logic
 frontend/                     Next.js app — the buildable version of the prototype
 ```
+
+## Prerequisites
+
+- Python 3.11+ (backend)
+- Node.js 18+ and npm (frontend — Next.js 16 requires it)
+- Git
+- No prerequisites for the prototype itself — any modern browser
+
+## Full local setup (all three pieces, in order)
+
+```bash
+git clone https://github.com/umapriya30/able-ai.git
+cd able-ai
+```
+
+1. **Prototype** — nothing to install, see [Running the prototype](#running-the-prototype)
+2. **Backend** — see [Running the backend](#running-the-backend-fastapi), start it first
+3. **Frontend** (separate terminal, backend still running) — see [Running the frontend](#running-the-frontend-nextjs)
 
 ## Running the prototype
 
@@ -44,6 +62,13 @@ uvicorn main:app --reload
 - Routers: `routers/profiles.py` (persona/profile data), `routers/ai.py` (habit/AI logic)
 - Config (`.env`): `ALLOWED_ORIGIN`, `DEFAULT_ANNUAL_RETURN_RATE`, `HABIT_COMPLETION_POINTS`, `GOAL_BONUS_POINTS`
 - Tests: `pytest` from inside `backend/`
+- Dependencies (`backend/requirements.txt`):
+  - `fastapi` — the API framework
+  - `uvicorn[standard]` — ASGI server used to run it
+  - `pydantic` — request/response models and validation
+  - `python-multipart` — form/file upload parsing
+  - `pytest` — test runner
+  - `httpx` — test client for the FastAPI app
 
 ## Running the frontend (Next.js)
 

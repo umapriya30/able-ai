@@ -32,6 +32,7 @@ yarn-error.log*
 
 # Python backend
 backend/.venv/
+backend/.env
 __pycache__/
 *.pyc
 .pytest_cache/

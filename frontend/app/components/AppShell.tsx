@@ -178,7 +178,13 @@ export function AppShell() {
     if (!goal || !personaId) return;
     const res = await api.toggleHabit(personaId, habitId, goal.goalId, lever);
     setHabits((prev) =>
-      prev ? prev.map((h) => (h.habit.habitId === habitId ? { habit: res.habit, ticked: res.ticked } : h)) : prev
+      prev
+        ? prev.map((h) =>
+            h.habit.habitId === habitId
+              ? { habit: res.habit, ticked: res.ticked, explanation: res.explanation }
+              : h
+          )
+        : prev
     );
     setProfile((p) => (p ? { ...p, points: res.points } : p));
     setTimeline(res.timeline);
@@ -192,7 +198,9 @@ export function AppShell() {
   const onAddCustomHabit = async (label: string, weeklySaving: number) => {
     if (!goal || !personaId) return;
     const res = await api.addCustomHabit(personaId, goal.goalId, lever, { label, weeklySaving });
-    setHabits((prev) => (prev ? [...prev, { habit: res.habit, ticked: res.ticked }] : prev));
+    setHabits((prev) =>
+      prev ? [...prev, { habit: res.habit, ticked: res.ticked, explanation: res.explanation }] : prev
+    );
     setProfile((p) => (p ? { ...p, points: res.points } : p));
     setTimeline(res.timeline);
     setFloaterText("+" + res.habit.points);

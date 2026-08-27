@@ -30,7 +30,7 @@ this module already computed; it never invents its own figures or advice.
 import math
 
 from config import settings
-from logic import WEEKS_PER_MONTH, compute_timeline
+from logic import WEEKS_PER_MONTH, compute_timeline, explain_habit
 from models import AIHabitSuggestion, Goal, HabitLibraryEntry, Payload, Profile
 
 
@@ -66,6 +66,7 @@ def generate_ai_habits(
                 weeklySaving=weekly_cut,
                 points=12,
                 personas=[profile.persona],
+                kind="reductive",  # a generated suggestion is always a category cut
                 generated=True,
             )
         )
@@ -99,7 +100,12 @@ def generate_ai_habits(
             else f"Adds £{candidate.weeklySaving:.2f}/week toward {goal.label}."
         )
         suggestions.append(
-            AIHabitSuggestion(habit=candidate, rationale=rationale, weeksSaved=weeks_saved)
+            AIHabitSuggestion(
+                habit=candidate,
+                rationale=rationale,
+                explanation=explain_habit(profile, candidate),
+                weeksSaved=weeks_saved,
+            )
         )
 
     return suggestions

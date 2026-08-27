@@ -1,24 +1,39 @@
+import random
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException
 
 import store
-from logic import award_goal_completion, compute_savings_history, compute_timeline
+from logic import (
+    award_goal_completion,
+    compute_savings_history,
+    compute_timeline,
+    explain_habit,
+    months_from_target_date,
+    spend_save_split,
+)
 from models import (
+    Bank,
     ClaimRewardRequest,
     ClaimRewardResponse,
     CustomHabitInput,
     Goal,
     GoalCompleteResponse,
+    GoalCreateInput,
     GoalEditInput,
+    HabitEntry,
     HabitLibraryEntry,
     HabitToggleResponse,
+    LinkBankResponse,
     LoginRequest,
     LoginResponse,
     Points,
     Profile,
+    ProfileEditInput,
     SavingsHistoryPoint,
     SignupRequest,
+    SpendSaveSummary,
     TimelineResult,
 )
 from persona_generator import build_signup_profile, generate_profile
@@ -160,15 +175,127 @@ def login(payload: LoginRequest) -> LoginResponse:
     return LoginResponse(profile=new_profile, isNew=True)
 
 
-@router.get("/profiles/{profile_id}", response_model=Profile)
-def get_profile(profile_id: str) -> Profile:
-    profile = _profile_or_404(profile_id)
+def _hydrated(profile: Profile) -> Profile:
+    """The profile as every screen should see it: session points, session goal
+    edits, session rewards credit. One place, so PATCH /profiles and
+    GET /profiles/{id} can never answer differently."""
     patched = profile.model_copy(deep=True)
-    patched.points = store.POINTS[profile_id]
+    patched.points = store.POINTS[profile.userId]
     for goal in patched.goals:
         goal.label, goal.targetAmount, goal.idealTimeframeMonths = store.effective_goal_fields(goal)
+        goal.targetDate = store.effective_target_date(goal)
         goal.saved = store.effective_saved(goal)
     return _apply_rewards_credit(patched)
+
+
+@router.get("/profiles/{profile_id}", response_model=Profile)
+def get_profile(profile_id: str) -> Profile:
+    return _hydrated(_profile_or_404(profile_id))
+
+
+@router.patch("/profiles/{profile_id}", response_model=Profile)
+def edit_profile(profile_id: str, payload: ProfileEditInput) -> Profile:
+    """Settings: rename yourself, or turn notifications off. The new name has
+    to show up everywhere the old one did (the dashboard greeting reads
+    displayName), so it's written to the live profile rather than kept as a
+    screen-local string. Session-only, like every other edit — Reset demo
+    reloads the payload and the original name comes back."""
+    profile = _profile_or_404(profile_id)
+
+    if payload.displayName is not None:
+        name = payload.displayName.strip()
+        if not name:
+            raise HTTPException(status_code=422, detail="displayName cannot be empty")
+        profile.displayName = name
+
+    if payload.notificationsEnabled is not None:
+        profile.preferences.notificationsEnabled = payload.notificationsEnabled
+
+    return _hydrated(profile)
+
+
+@router.get("/profiles/{profile_id}/spend-summary", response_model=SpendSaveSummary)
+def get_spend_summary(profile_id: str, days: int = 30) -> SpendSaveSummary:
+    """The dashboard donut. Returns £ figures, not just percentages — the
+    screen shows both halves in pounds, and a percentage alone can't be
+    checked against the balance above it."""
+    profile = _profile_or_404(profile_id)
+    if days <= 0:
+        raise HTTPException(status_code=422, detail="days must be greater than 0")
+
+    spent, saved = spend_save_split(profile, days)
+    total = round(spent + saved, 2)
+    spent_pct = round(spent / total * 100) if total > 0 else 0
+    return SpendSaveSummary(
+        periodDays=days,
+        spent=spent,
+        saved=saved,
+        total=total,
+        spentPct=spent_pct,
+        savedPct=100 - spent_pct if total > 0 else 0,  # two segments, always 100 between them
+        currency=profile.accounts[0].currency if profile.accounts else "GBP",
+    )
+
+
+@router.post("/profiles/{profile_id}/banks/link", response_model=LinkBankResponse)
+def link_bank(profile_id: str) -> LinkBankResponse:
+    """Settings -> Add new account. Picks a partner bank the user hasn't
+    connected yet; bankId (the bank that routed them to us, and the funder
+    named on the rewards screen) never moves."""
+    profile = _profile_or_404(profile_id)
+    linked = profile.linkedBankIds or [profile.bankId]
+    available = [b for b in store.PAYLOAD.banks if b.bankId not in linked]
+    if not available:
+        raise HTTPException(status_code=409, detail="Every partner bank is already linked")
+
+    bank = random.choice(available)
+    profile.linkedBankIds = [*linked, bank.bankId]
+    by_id: dict[str, Bank] = {b.bankId: b for b in store.PAYLOAD.banks}
+    return LinkBankResponse(
+        bank=bank,
+        linkedBanks=[by_id[bank_id] for bank_id in profile.linkedBankIds if bank_id in by_id],
+    )
+
+
+@router.post("/profiles/{profile_id}/goals", response_model=Goal)
+def create_goal(profile_id: str, payload: GoalCreateInput) -> Goal:
+    """Create New Goal. The timeframe arrives as either a months slider value
+    or a calendar date — exactly one, converted to months here so everything
+    downstream keeps reading a single field."""
+    profile = _profile_or_404(profile_id)
+
+    label = payload.label.strip()
+    if not label:
+        raise HTTPException(status_code=422, detail="label is required")
+    if payload.targetAmount <= 0:
+        raise HTTPException(status_code=422, detail="targetAmount must be greater than 0")
+    if (payload.idealTimeframeMonths is None) == (payload.targetDate is None):
+        raise HTTPException(
+            status_code=422, detail="send exactly one of idealTimeframeMonths or targetDate"
+        )
+
+    if payload.targetDate is not None:
+        try:
+            months = months_from_target_date(payload.targetDate)
+        except ValueError:
+            raise HTTPException(status_code=422, detail="targetDate must be an ISO date")
+    else:
+        months = payload.idealTimeframeMonths
+        if months <= 0:
+            raise HTTPException(status_code=422, detail="idealTimeframeMonths must be greater than 0")
+
+    goal = Goal(
+        goalId=f"g_{uuid.uuid4().hex[:8]}",
+        label=label,
+        emoji=payload.emoji,
+        targetAmount=round(payload.targetAmount, 2),
+        saved=round(min(max(0.0, payload.startingSaved), payload.targetAmount), 2),
+        idealTimeframeMonths=months,
+        createdAt=datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        targetDate=payload.targetDate,
+    )
+    profile.goals.append(goal)
+    return goal
 
 
 @router.get("/profiles/{profile_id}/goals/{goal_id}/savings-history", response_model=list[SavingsHistoryPoint])
@@ -214,10 +341,21 @@ def edit_goal(profile_id: str, goal_id: str, payload: GoalEditInput) -> Goal:
     if payload.targetAmount is not None and payload.targetAmount <= 0:
         raise HTTPException(status_code=422, detail="targetAmount must be greater than 0")
 
+    if payload.targetDate is not None:
+        try:
+            # A date the user picked wins over any months value sent with it —
+            # they moved the calendar, not the slider.
+            payload = payload.model_copy(
+                update={"idealTimeframeMonths": months_from_target_date(payload.targetDate)}
+            )
+        except ValueError:
+            raise HTTPException(status_code=422, detail="targetDate must be an ISO date")
+
     store.GOAL_OVERRIDES[goal_id] = payload
     label, target, ideal = store.effective_goal_fields(goal)
     patched = goal.model_copy()
     patched.label, patched.targetAmount, patched.idealTimeframeMonths = label, target, ideal
+    patched.targetDate = store.effective_target_date(goal)
     return patched
 
 
@@ -230,15 +368,24 @@ def get_timeline(profile_id: str, goal_id: str, lever: float = 0.0) -> TimelineR
     return compute_timeline(profile, goal, target, ideal, ticked_total, lever, saved_override=store.effective_saved(goal))
 
 
-@router.get("/profiles/{profile_id}/habits")
-def get_habits(profile_id: str, goal_id: str | None = None):
+@router.get("/profiles/{profile_id}/habits", response_model=list[HabitEntry])
+def get_habits(profile_id: str, goal_id: str | None = None) -> list[HabitEntry]:
+    """Reductive first, then productive — the Action Center's two halves, in
+    the order the screen stacks them. Each row carries the explanation its
+    dropdown shows, computed from this profile's own spending."""
     profile = _profile_or_404(profile_id)
     ticked = store.TICKED_HABITS.get(profile_id, set())
     curated = [h for h in store.PAYLOAD.habitLibrary if profile.persona in h.personas]
     custom = store.CUSTOM_HABITS.get(profile_id, [])
+    habits = [*curated, *custom]
+    habits.sort(key=lambda h: h.kind == "productive")  # stable: preserves library order within each kind
     return [
-        {"habit": habit, "ticked": habit.habitId in ticked}
-        for habit in [*curated, *custom]
+        HabitEntry(
+            habit=habit,
+            ticked=habit.habitId in ticked,
+            explanation=explain_habit(profile, habit),
+        )
+        for habit in habits
     ]
 
 
@@ -279,7 +426,13 @@ def toggle_habit(profile_id: str, habit_id: str, goal_id: str, lever: float = 0.
     ticked_total = _ticked_weekly_total(profile_id, profile)
     timeline = compute_timeline(profile, goal, target, ideal, ticked_total, lever, saved_override=store.effective_saved(goal))
 
-    return HabitToggleResponse(habit=habit, ticked=now_ticked, points=points, timeline=timeline)
+    return HabitToggleResponse(
+        habit=habit,
+        ticked=now_ticked,
+        explanation=explain_habit(profile, habit),
+        points=points,
+        timeline=timeline,
+    )
 
 
 @router.post("/profiles/{profile_id}/habits/custom", response_model=HabitToggleResponse)
@@ -318,7 +471,13 @@ def add_custom_habit(profile_id: str, payload: CustomHabitInput, goal_id: str, l
     ticked_total = _ticked_weekly_total(profile_id, profile)
     timeline = compute_timeline(profile, goal, target, ideal, ticked_total, lever, saved_override=store.effective_saved(goal))
 
-    return HabitToggleResponse(habit=habit, ticked=True, points=points, timeline=timeline)
+    return HabitToggleResponse(
+        habit=habit,
+        ticked=True,
+        explanation=explain_habit(profile, habit),
+        points=points,
+        timeline=timeline,
+    )
 
 
 @router.post("/profiles/{profile_id}/goals/{goal_id}/complete", response_model=GoalCompleteResponse)

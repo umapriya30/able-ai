@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#E4E9E4; font-family:'Hanken Grotesk',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:#0A7250; text-decoration:none; }
+  a:hover { color:#0E9F6E; }
+  @keyframes ableSweep { from { transform:scaleX(.55); } to { transform:scaleX(1); } }
+  @keyframes ablePulse { 0%,100% { opacity:.9; } 50% { opacity:.35; } }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation:none !important; transition-duration:120ms !important; transition-property:opacity !important; }
+  }
+</style>
+</helmet>
+
+<section id="1a" style="display:flex;flex-direction:column;gap:56px;padding:64px 72px 120px;min-width:2200px">
+
+  <div style="display:flex;flex-direction:column;gap:14px;max-width:65ch">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#0C2321;background:#C8F135;padding:7px 10px;border-radius:999px">1a</span>
+      <span style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">Able AI · 14 screens · light + dark · flow order</span>
+    </div>
+    <h1 style="margin:0;font:800 56px/1.02 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:#0C2321">Time is the material.</h1>
+    <p style="margin:0;font:400 16px/1.55 'Hanken Grotesk',sans-serif;color:#3D524E">Every screen measures distance, not amounts. The same horizontal rail appears at three scales — goal card, timeline, reward bar. Green only where the week count actually dropped; amber, never red, where it did not.</p>
+  </div>
+
+  <!-- 01 WELCOME -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">01 Welcome · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:32px 24px 28px">
+                <div style="display:flex;flex-direction:column;gap:28px">
+                  <div style="display:flex;align-items:center;gap:14px">
+                    <svg width="88" height="88" viewBox="0 0 120 120" fill="none" role="img" aria-label="Able AI">
+                      <path d="M26 104L58 28L90 104" stroke="var(--ink)" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <path d="M22 88C42 86 46 68 64 63C79 59 86 50 97 36" stroke="var(--momentum)" stroke-width="13" stroke-linecap="round"></path>
+                      <path d="M112 16L107 44L86 28Z" fill="var(--momentum)"></path>
+                    </svg>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <div style="font:700 44px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.04em;color:var(--ink)">ABLE AI</div>
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Turning little habits<br>into big benefits</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:14px">
+                    <div style="font:800 44px/1.02 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--ink)">A savings goal, measured in weeks — not wishes.</div>
+                    <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Reads your real spending · shortens the wait</div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">Get started</div>
+                  <div style="height:56px;border-radius:10px;border:1.5px solid var(--ink);color:var(--ink);display:flex;align-items:center;justify-content:center;font:500 16px 'Hanken Grotesk',sans-serif">Log in</div>
+                  <div style="font:400 12px/1.5 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);text-align:center;padding-top:4px">Read-only bank access · revoke anytime</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 02 BANK LINKING -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">02 Bank linking · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:20px;padding:8px 20px 20px;overflow:hidden">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Step 1 of 2 · Open Banking</div>
+                  <div style="font:800 31px/1.08 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">Connect your bank</div>
+                  <div style="font:400 16px/1.55 'Hanken Grotesk',sans-serif;color:var(--muted)">Able AI reads your real spending through your bank's own API. It cannot move money.</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:14px 16px;display:flex;align-items:center;gap:14px;min-height:56px">
+                    <div style="width:44px;height:44px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:700 16px 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em">NW</div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                      <div style="font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">NatWest</div>
+                      <div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Personal · Business</div>
+                    </div>
+                    <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                  </div>
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:14px 16px;display:flex;align-items:center;gap:14px;min-height:56px">
+                    <div style="width:44px;height:44px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:700 16px 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em">CB</div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                      <div style="font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">ClearBank</div>
+                      <div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Agency accounts</div>
+                    </div>
+                    <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                  </div>
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:14px 16px;display:flex;align-items:center;gap:14px;min-height:56px">
+                    <div style="width:44px;height:44px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:700 16px 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em">AB</div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                      <div style="font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Allica Bank</div>
+                      <div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Business savings</div>
+                    </div>
+                    <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                  </div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">You will be asked to share</div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;gap:10px;align-items:flex-start">
+                      <span style="color:var(--momentum-ink);margin-top:1px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9.5l3.2 3.2L14 6"/></svg></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                        <div style="font:400 14px/1.2 'DM Mono',monospace;color:var(--ink)">accounts:read</div>
+                        <div style="font:400 14px/1.45 'Hanken Grotesk',sans-serif;color:var(--muted)">Account names and balances</div>
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:flex-start">
+                      <span style="color:var(--momentum-ink);margin-top:1px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9.5l3.2 3.2L14 6"/></svg></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                        <div style="font:400 14px/1.2 'DM Mono',monospace;color:var(--ink)">transactions:read</div>
+                        <div style="font:400 14px/1.45 'Hanken Grotesk',sans-serif;color:var(--muted)">12 months of history, read-only</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="height:1px;background:rgba(92,112,107,.24)"></div>
+                  <div style="font:400 14px/1.45 'Hanken Grotesk',sans-serif;color:var(--muted)">No payment access. No card details. Consent expires in 90 days.</div>
+                </div>
+                <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+                  <div style="height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">Continue to NatWest</div>
+                  <div style="font:400 12px/1.5 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);text-align:center">You approve this inside your bank's app</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 03 ANALYSING -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">03 Analysing · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px;padding:20px 24px 40px">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Reading your accounts</div>
+                  <div style="font:800 31px/1.08 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums">12 months of spending<br>· 7 categories</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="position:relative;height:6px;border-radius:999px;background:rgba(92,112,107,.28);overflow:hidden">
+                    <div style="position:absolute;left:0;top:0;bottom:0;width:62%;border-radius:999px;background:var(--momentum);transform-origin:left;animation:ableSweep 1.6s ease-in-out infinite alternate"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums"><span>1,412 transactions</span><span>62%</span></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;gap:12px;align-items:center;min-height:44px">
+                    <span style="width:24px;height:24px;border-radius:999px;background:var(--momentum-soft);color:var(--momentum-ink);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9.5l3.2 3.2L14 6"/></svg></span>
+                    <span style="font:500 16px 'Hanken Grotesk',sans-serif;color:var(--ink)">Accounts linked · 3</span>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:center;min-height:44px">
+                    <span style="width:24px;height:24px;border-radius:999px;background:var(--momentum-soft);color:var(--momentum-ink);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9.5l3.2 3.2L14 6"/></svg></span>
+                    <span style="font:500 16px 'Hanken Grotesk',sans-serif;color:var(--ink)">Recurring costs grouped</span>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:center;min-height:44px">
+                    <span style="width:24px;height:24px;border-radius:999px;border:1.5px solid var(--muted);animation:ablePulse 1.4s ease-in-out infinite"></span>
+                    <span style="font:500 16px 'Hanken Grotesk',sans-serif;color:var(--ink)">Finding habits that shorten the wait</span>
+                  </div>
+                </div>
+                <div style="font:400 14px/1.5 'Hanken Grotesk',sans-serif;color:var(--muted);max-width:34ch">This takes two or three seconds. Nothing leaves your bank but the two scopes you approved.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 04 DASHBOARD -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">04 Dashboard · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:4px 20px 16px;overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="font:800 25px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">Hi, {{ userName }}</div>
+                  <div style="width:44px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--card)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><circle cx="10" cy="10" r="7.2"/><path d="M10 1v2M10 17v2M1 10h2M17 10h2"/></svg></div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:18px;display:flex;flex-direction:column;gap:6px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Total balance</div>
+                  <div style="font:800 44px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums">£1,924.50</div>
+                  <div style="font:400 14px/1.4 'Hanken Grotesk',sans-serif;color:var(--muted)">Across 3 linked accounts</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;gap:16px;align-items:center">
+                  <div style="position:relative;width:112px;height:112px;flex:none">
+                    <svg width="112" height="112" viewBox="0 0 112 112" style="transform:rotate(-90deg)">
+                      <circle cx="56" cy="56" r="46" fill="none" stroke="var(--ink)" stroke-width="16" stroke-dasharray="264.6 289.0"></circle>
+                      <circle cx="56" cy="56" r="46" fill="none" stroke="var(--momentum)" stroke-width="16" stroke-dasharray="24.4 289.0" stroke-dashoffset="-264.6"></circle>
+                    </svg>
+                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Last<br>30 days</div>
+                  </div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;flex-direction:column;gap:3px">
+                      <div style="display:flex;align-items:center;gap:8px;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)"><span style="width:8px;height:8px;border-radius:999px;background:var(--ink)"></span>Spent</div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums">£1,619.60</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:3px">
+                      <div style="display:flex;align-items:center;gap:8px;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)"><span style="width:8px;height:8px;border-radius:999px;background:var(--momentum)"></span>Saved</div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--momentum-ink);font-variant-numeric:tabular-nums">£149.93</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Active goals · 2</div>
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Distance</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <span style="font-size:20px;line-height:1">🏠</span>
+                      <div style="flex:1;font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">House deposit</div>
+                      <div style="font:700 20px/1 'Bricolage Grotesque',sans-serif;color:var(--slip-ink);font-variant-numeric:tabular-nums">372w</div>
+                    </div>
+                    <div style="position:relative;height:16px">
+                      <div style="position:absolute;left:0;right:0;top:5px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                      <div style="position:absolute;left:0;width:100%;top:5px;height:6px;border-radius:999px;background:var(--slip)"></div>
+                      <div style="position:absolute;left:17.5%;top:0;bottom:0;width:2px;background:var(--ink)"></div>
+                      <div style="position:absolute;left:calc(100% - 8px);top:0;width:16px;height:16px;border-radius:999px;background:var(--slip);border:3px solid var(--card)"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums"><span>£13,000</span><span style="color:var(--slip-ink)">307w past target</span></div>
+                  </div>
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <span style="font-size:20px;line-height:1">👟</span>
+                      <div style="flex:1;font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Sneakers</div>
+                      <div style="font:700 20px/1 'Bricolage Grotesque',sans-serif;color:var(--momentum-ink);font-variant-numeric:tabular-nums">5w</div>
+                    </div>
+                    <div style="position:relative;height:16px">
+                      <div style="position:absolute;left:0;right:0;top:5px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                      <div style="position:absolute;left:0;width:62%;top:5px;height:6px;border-radius:999px;background:var(--momentum)"></div>
+                      <div style="position:absolute;left:88%;top:0;bottom:0;width:2px;background:var(--ink)"></div>
+                      <div style="position:absolute;left:calc(62% - 8px);top:0;width:16px;height:16px;border-radius:999px;background:var(--momentum);border:3px solid var(--card)"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums"><span>£180</span><span style="color:var(--momentum-ink)">2w ahead</span></div>
+                  </div>
+                </div>
+                <div style="margin-top:auto;height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;gap:10px;font:600 16px 'Hanken Grotesk',sans-serif"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3v12M3 9h12"/></svg>Create new goal</div>
+              </div>
+              <div style="flex:none;height:64px;border-top:1px solid rgba(92,112,107,.22);background:var(--card);display:flex;align-items:center;justify-content:space-around;padding:0 12px">
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l7-6 7 6v8H3z"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">HOME</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">GOALS</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="14" height="9" rx="2"/><path d="M3 10h14"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">REWARDS</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><circle cx="10" cy="10" r="7.2"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">YOU</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 05 CREATE GOAL: WHAT & HOW MUCH (two cases) -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ goalCases }}" as="g" hint-placeholder-count="4">
+      <div style="{{ g.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">05 Create goal · {{ g.label }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:20px;padding:8px 20px 20px;overflow:hidden">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Step 1 of 3 · What &amp; how much</div>
+                  <div style="font:800 31px/1.08 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">What are you saving for?</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:14px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Goal name</div>
+                  <div style="display:flex;align-items:center;gap:12px;min-height:44px;border-bottom:1.5px solid var(--ink);padding-bottom:8px">
+                    <span style="font-size:25px;line-height:1">{{ g.emoji }}</span>
+                    <span style="flex:1;font:600 25px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">{{ g.name }}</span>
+                    <span style="width:2px;height:26px;background:var(--momentum)"></span>
+                  </div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Target amount</div>
+                  <div style="font:800 44px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums">{{ g.amount }}</div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <span style="height:36px;padding:0 14px;border-radius:999px;background:rgba(92,112,107,.16);color:var(--ink);display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em">+£50</span>
+                    <span style="height:36px;padding:0 14px;border-radius:999px;background:rgba(92,112,107,.16);color:var(--ink);display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em">+£100</span>
+                    <span style="height:36px;padding:0 14px;border-radius:999px;background:rgba(92,112,107,.16);color:var(--ink);display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em">+£1,000</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Pick an icon</div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <span style="{{ g.pick1 }}">🏠</span>
+                    <span style="{{ g.pick2 }}">👟</span>
+                    <span style="width:48px;height:48px;border-radius:999px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px">✈️</span>
+                    <span style="width:48px;height:48px;border-radius:999px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px">🎓</span>
+                    <span style="width:48px;height:48px;border-radius:999px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px">🚗</span>
+                    <span style="width:48px;height:48px;border-radius:999px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px">🎁</span>
+                  </div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">First read on your spending</div>
+                  <div style="font:400 16px/1.5 'Hanken Grotesk',sans-serif;color:{{ g.readColor }}">{{ g.read }}</div>
+                </div>
+                <div style="margin-top:auto;height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">Set a timeframe</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 06A MONTHS SLIDER -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">06a Timeframe · months slider · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:24px;padding:8px 20px 20px;overflow:hidden">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Step 2 of 3 · Timeframe</div>
+                  <div style="font:800 31px/1.08 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">When do you want it by?</div>
+                </div>
+                <div style="display:flex;gap:8px;background:rgba(92,112,107,.16);padding:4px;border-radius:999px">
+                  <div style="flex:1;height:44px;border-radius:999px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:500 14px 'Hanken Grotesk',sans-serif">In months</div>
+                  <div style="flex:1;height:44px;border-radius:999px;color:var(--ink);display:flex;align-items:center;justify-content:center;font:500 14px 'Hanken Grotesk',sans-serif">On a date</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:20px 16px 16px;display:flex;flex-direction:column;gap:20px">
+                  <div style="display:flex;align-items:flex-end;gap:10px">
+                    <div style="font:800 56px/.9 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums">15</div>
+                    <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-bottom:8px">months · 65 weeks</div>
+                  </div>
+                  <div style="position:relative;height:44px">
+                    <div style="position:absolute;left:0;right:0;top:19px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                    <div style="position:absolute;left:0;width:42%;top:19px;height:6px;border-radius:999px;background:var(--ink)"></div>
+                    <div style="position:absolute;left:calc(42% - 14px);top:5px;width:28px;height:28px;border-radius:999px;background:var(--card);border:2px solid var(--ink);box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;color:var(--muted);font-variant-numeric:tabular-nums"><span>3</span><span>6</span><span>12</span><span>18</span><span>24</span><span>36</span></div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:10px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">That would mean</div>
+                  <div style="display:flex;align-items:baseline;gap:8px">
+                    <div style="font:800 31px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--slip-ink);font-variant-numeric:tabular-nums">£197</div>
+                    <div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">per week</div>
+                  </div>
+                  <div style="font:400 16px/1.5 'Hanken Grotesk',sans-serif;color:var(--muted)">Your spending currently leaves £35 a week. We will show you the honest distance next.</div>
+                </div>
+                <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+                  <div style="height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">See the distance</div>
+                  <div style="height:44px;border-radius:10px;color:var(--ink);display:flex;align-items:center;justify-content:center;font:500 16px 'Hanken Grotesk',sans-serif">Back</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 06B CALENDAR DATE -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">06b Timeframe · calendar date · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:20px;padding:8px 20px 20px;overflow:hidden">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Step 2 of 3 · Timeframe</div>
+                  <div style="font:800 31px/1.08 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">When do you want it by?</div>
+                </div>
+                <div style="display:flex;gap:8px;background:rgba(92,112,107,.16);padding:4px;border-radius:999px">
+                  <div style="flex:1;height:44px;border-radius:999px;color:var(--ink);display:flex;align-items:center;justify-content:center;font:500 14px 'Hanken Grotesk',sans-serif">In months</div>
+                  <div style="flex:1;height:44px;border-radius:999px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:500 14px 'Hanken Grotesk',sans-serif">On a date</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:14px">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="transform:rotate(180deg)"><path d="M6 3l5 5-5 5"/></svg></span>
+                    <span style="font:700 20px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">November 2027</span>
+                    <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);text-align:center">
+                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font:400 14px/1 'DM Mono',monospace;color:var(--ink);font-variant-numeric:tabular-nums">
+                    <sc-for list="{{ novDays }}" as="d" hint-placeholder-count="35">
+                      <span style="{{ d.style }}">{{ d.n }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:8px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Selected · 19 Nov 2027</div>
+                  <div style="display:flex;align-items:flex-end;gap:10px">
+                    <div style="font:800 44px/.95 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums">65</div>
+                    <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-bottom:6px">weeks from today · 15 months</div>
+                  </div>
+                  <div style="font:400 14px/1.5 'Hanken Grotesk',sans-serif;color:var(--muted)">Months and dates write the same number. Switch freely.</div>
+                </div>
+                <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+                  <div style="height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">See the distance</div>
+                  <div style="height:44px;border-radius:10px;color:var(--ink);display:flex;align-items:center;justify-content:center;font:500 16px 'Hanken Grotesk',sans-serif">Back</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 07 GOAL BREAKDOWN -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">07 Goal breakdown · the reality check · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:4px 20px 12px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink);margin-left:-10px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="transform:rotate(180deg)"><path d="M6 3l5 5-5 5"/></svg></span>
+                  <span style="font-size:20px;line-height:1">🏠</span>
+                  <div style="flex:1;font:700 20px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">House deposit £13,000</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:18px 16px;display:flex;flex-direction:column;gap:16px">
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">At £35 a week you arrive in</div>
+                      <div aria-live="polite" style="font:800 44px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--slip-ink);font-variant-numeric:tabular-nums">372 weeks</div>
+                    </div>
+                    <div style="height:36px;padding:0 12px;border-radius:999px;background:var(--slip-soft);color:var(--slip-ink);display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase">Behind</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="position:relative;height:24px">
+                      <div style="position:absolute;left:0;right:0;top:9px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                      <div style="position:absolute;left:0;width:100%;top:9px;height:6px;border-radius:999px;background:var(--slip)"></div>
+                      <div style="position:absolute;left:17.5%;top:0;bottom:0;width:2px;background:var(--ink)"></div>
+                      <div style="position:absolute;left:calc(17.5% - 4px);top:-2px;width:10px;height:10px;border-radius:2px;background:var(--ink)"></div>
+                      <div style="position:absolute;left:calc(100% - 11px);top:1px;width:22px;height:22px;border-radius:999px;background:var(--slip);border:3px solid var(--card)"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums"><span>Today</span><span style="color:var(--ink)">Target 65w</span><span>372w</span></div>
+                  </div>
+                  <div style="height:1px;background:rgba(92,112,107,.24)"></div>
+                  <div style="display:flex;gap:20px">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">15 months needs</div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums">£197/wk</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">You have spare</div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums">£35/wk</div>
+                    </div>
+                  </div>
+                  <div style="height:44px;border-radius:10px;border:1.5px solid var(--ink);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px;font:500 14px 'Hanken Grotesk',sans-serif">Edit target</div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Action center</div>
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Weeks saved</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;overflow:hidden">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Reductive</div>
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);display:flex;flex-direction:column">
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                      <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                        <div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Skip 3 coffees this week</div>
+                        <div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£10.50/WK · 15 PTS</div>
+                      </div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                    <div style="height:1px;background:rgba(92,112,107,.18);margin:0 14px"></div>
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                      <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                        <div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Pack lunch 2 days</div>
+                        <div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£8.20/WK · 12 PTS</div>
+                      </div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                  </div>
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:4px">Productive</div>
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);display:flex;flex-direction:column">
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                      <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                        <div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Sweep what's left the day before payday</div>
+                        <div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£14.00/WK · 18 PTS</div>
+                      </div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                    <div style="height:1px;background:rgba(92,112,107,.18);margin:0 14px"></div>
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                      <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                        <div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Round card payments up to the nearest £1</div>
+                        <div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£4.30/WK · 10 PTS</div>
+                      </div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 08 HABIT EXPANDED -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">08 Habit expanded · where the money is · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:4px 20px 12px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink);margin-left:-10px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="transform:rotate(180deg)"><path d="M6 3l5 5-5 5"/></svg></span>
+                  <span style="font-size:20px;line-height:1">🏠</span>
+                  <div style="flex:1;font:700 20px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">House deposit £13,000</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">At £35 a week</div>
+                    <div aria-live="polite" style="font:800 31px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--slip-ink);font-variant-numeric:tabular-nums">372 weeks</div>
+                  </div>
+                  <div style="position:relative;height:16px">
+                    <div style="position:absolute;left:0;right:0;top:5px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                    <div style="position:absolute;left:0;width:100%;top:5px;height:6px;border-radius:999px;background:var(--slip)"></div>
+                    <div style="position:absolute;left:17.5%;top:0;bottom:0;width:2px;background:var(--ink)"></div>
+                  </div>
+                </div>
+                <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Reductive</div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);display:flex;flex-direction:column">
+                  <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                    <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                      <div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Skip 3 coffees this week</div>
+                      <div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£10.50/WK · 15 PTS</div>
+                    </div>
+                    <span style="color:var(--ink);transform:rotate(90deg)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                  </div>
+                  <div style="padding:0 14px 16px;display:flex;flex-direction:column;gap:14px">
+                    <div style="height:1px;background:rgba(92,112,107,.18)"></div>
+                    <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Where this came from</div>
+                    <div style="font:400 16px/1.55 'Hanken Grotesk',sans-serif;color:var(--ink);max-width:40ch">You currently spend <span style="font-variant-numeric:tabular-nums">£72/month</span> on coffee &amp; snacks. This frees up <span style="font-variant-numeric:tabular-nums">£46/month</span> — <span style="font-variant-numeric:tabular-nums">£10.50</span> a week toward the goal.</div>
+                    <div style="display:flex;gap:8px;align-items:stretch">
+                      <div style="flex:1;background:rgba(92,112,107,.14);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px">
+                        <div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Now</div>
+                        <div style="font:700 20px/1 'Bricolage Grotesque',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">£72/mo</div>
+                      </div>
+                      <div style="flex:1;background:var(--momentum-soft);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px">
+                        <div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--momentum-ink)">Freed up</div>
+                        <div style="font:700 20px/1 'Bricolage Grotesque',sans-serif;color:var(--momentum-ink);font-variant-numeric:tabular-nums">£46/mo</div>
+                      </div>
+                    </div>
+                    <div style="font:400 12px/1.5 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted)">Based on 12 months of transactions in coffee &amp; snacks.</div>
+                    <div style="height:44px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:500 14px 'Hanken Grotesk',sans-serif">Add to this week</div>
+                  </div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                  <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                    <div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Pack lunch 2 days</div>
+                    <div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£8.20/WK · 12 PTS</div>
+                  </div>
+                  <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 09 THREE HABITS TICKED (live) -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">09 Habits ticked · the payoff · live · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:4px 20px 12px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink);margin-left:-10px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="transform:rotate(180deg)"><path d="M6 3l5 5-5 5"/></svg></span>
+                  <span style="font-size:20px;line-height:1">🏠</span>
+                  <div style="flex:1;font:700 20px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">House deposit £13,000</div>
+                  <div style="height:32px;padding:0 12px;border-radius:999px;background:var(--lime);color:#0C2321;display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;font-variant-numeric:tabular-nums" aria-live="polite">+{{ points }} PTS</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:18px 16px;display:flex;flex-direction:column;gap:16px">
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">You now arrive in</div>
+                      <div aria-live="polite" style="{{ weeksStyle }}">{{ weeks }} weeks</div>
+                    </div>
+                    <div style="{{ deltaChipStyle }}">{{ deltaLabel }}</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="position:relative;height:24px">
+                      <div style="position:absolute;left:0;right:0;top:9px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                      <div style="{{ railFillStyle }}"></div>
+                      <div style="position:absolute;left:95.6%;top:0;bottom:0;width:2px;background:var(--ink)"></div>
+                      <div style="position:absolute;left:calc(95.6% - 4px);top:-2px;width:10px;height:10px;border-radius:2px;background:var(--ink)"></div>
+                      <div style="{{ railMarkerStyle }}"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums"><span>Today</span><span style="color:var(--ink)">Target 65w</span><span>68w</span></div>
+                  </div>
+                  <div style="font:400 14px/1.5 'Hanken Grotesk',sans-serif;color:var(--muted)">{{ railCaption }}</div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Action center · tap to tick</div>
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums">{{ tickedCount }}/4 done</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;overflow:hidden">
+                  <sc-for list="{{ habits }}" as="h" hint-placeholder-count="4">
+                    <div style="{{ h.rowStyle }}">
+                      <div onClick="{{ h.toggle }}" role="checkbox" aria-checked="{{ h.ticked }}" style="{{ h.tickStyle }}">
+                        <sc-if value="{{ h.ticked }}" hint-placeholder-val="{{ true }}">
+                          <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9.5l3.2 3.2L14 6"/></svg>
+                        </sc-if>
+                      </div>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                        <div style="{{ h.labelStyle }}">{{ h.label }}</div>
+                        <div style="{{ h.metaStyle }}">{{ h.meta }}</div>
+                      </div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 10 GOAL REACHED -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">10 Goal reached · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:4px 20px 20px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink);margin-left:-10px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="transform:rotate(180deg)"><path d="M6 3l5 5-5 5"/></svg></span>
+                  <span style="font-size:20px;line-height:1">👟</span>
+                  <div style="flex:1;font:700 20px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">Sneakers £180</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:18px 16px;display:flex;flex-direction:column;gap:16px">
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Distance remaining</div>
+                      <div aria-live="polite" style="font:800 44px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--momentum-ink);font-variant-numeric:tabular-nums">0 weeks</div>
+                    </div>
+                    <div style="height:36px;padding:0 12px;border-radius:999px;background:var(--momentum-soft);color:var(--momentum-ink);display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase">Arrived</div>
+                  </div>
+                  <div style="position:relative;height:24px">
+                    <div style="position:absolute;left:0;right:0;top:9px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                    <div style="position:absolute;left:0;width:100%;top:9px;height:6px;border-radius:999px;background:var(--momentum)"></div>
+                    <div style="position:absolute;left:calc(100% - 2px);top:0;bottom:0;width:2px;background:var(--ink)"></div>
+                    <div style="position:absolute;left:calc(100% - 22px);top:1px;width:22px;height:22px;border-radius:999px;background:var(--momentum);border:3px solid var(--card)"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums"><span>Started 5w ago</span><span style="color:var(--ink)">Goalpost met</span></div>
+                  <div style="height:1px;background:rgba(92,112,107,.24)"></div>
+                  <div style="display:flex;gap:20px">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Saved</div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">£180</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Faster than planned</div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;color:var(--momentum-ink);font-variant-numeric:tabular-nums">2 weeks</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:10px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Habits that did it</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;align-items:center;gap:10px;min-height:44px"><span style="width:24px;height:24px;border-radius:999px;background:var(--momentum);color:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9.5l3.2 3.2L14 6"/></svg></span><span style="flex:1;font:500 16px 'Hanken Grotesk',sans-serif;color:var(--ink)">Skip 3 coffees this week</span><span style="font:400 12px/1 'DM Mono',monospace;color:var(--muted);font-variant-numeric:tabular-nums">×5</span></div>
+                    <div style="display:flex;align-items:center;gap:10px;min-height:44px"><span style="width:24px;height:24px;border-radius:999px;background:var(--momentum);color:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9.5l3.2 3.2L14 6"/></svg></span><span style="flex:1;font:500 16px 'Hanken Grotesk',sans-serif;color:var(--ink)">Round card payments up</span><span style="font:400 12px/1 'DM Mono',monospace;color:var(--muted);font-variant-numeric:tabular-nums">×5</span></div>
+                  </div>
+                </div>
+                <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+                  <div style="height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">Mark goal reached</div>
+                  <div style="height:44px;border-radius:10px;color:var(--ink);display:flex;align-items:center;justify-content:center;font:500 16px 'Hanken Grotesk',sans-serif">Keep saving into this goal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 11 CELEBRATION (always dark) -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ celebrations }}" as="c" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">11 Celebration · always dark · {{ c.label }}</div>
+        <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+          <div style="width:390px;height:844px;background:#08110F;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+            <div style="position:absolute;left:50%;top:210px;width:520px;height:520px;margin-left:-260px;border-radius:999px;background:rgba(200,241,53,.10)"></div>
+            <div style="position:absolute;left:50%;top:280px;width:380px;height:380px;margin-left:-190px;border-radius:999px;background:rgba(200,241,53,.14)"></div>
+            <div style="position:absolute;left:50%;top:340px;width:240px;height:240px;margin-left:-120px;border-radius:999px;background:rgba(200,241,53,.18)"></div>
+            <div style="position:absolute;left:56px;top:236px;width:10px;height:34px;border-radius:2px;background:#C8F135;transform:rotate(24deg);opacity:.9"></div>
+            <div style="position:absolute;right:64px;top:288px;width:8px;height:28px;border-radius:2px;background:#C8F135;transform:rotate(-38deg);opacity:.75"></div>
+            <div style="position:absolute;left:96px;bottom:270px;width:8px;height:24px;border-radius:2px;background:#C8F135;transform:rotate(-14deg);opacity:.6"></div>
+            <div style="position:absolute;right:92px;bottom:236px;width:10px;height:30px;border-radius:2px;background:#C8F135;transform:rotate(32deg);opacity:.8"></div>
+            <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:#E9F1ED;position:relative"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid #E9F1ED;border-radius:2px;opacity:.55"></span></div>
+            <div style="position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:24px 28px 32px;text-align:center;align-items:center">
+              <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#8FA39D">Goal reached · Sneakers £180</div>
+              <div style="font:800 56px/.98 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:#E9F1ED">You got there<br>2 weeks early</div>
+              <div style="{{ c.pointsStyle }}" aria-live="polite">{{ c.points }}</div>
+              <div style="font:400 16px/1.55 'Hanken Grotesk',sans-serif;color:#8FA39D;max-width:32ch">{{ c.body }}</div>
+              <sc-if value="{{ c.capped }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:10px;align-items:flex-start;text-align:left;border-left:2px solid #D99A3D;padding:2px 0 2px 12px;max-width:34ch">
+                  <div style="font:400 14px/1.5 'Hanken Grotesk',sans-serif;color:#D99A3D">One goal reward per month — next one unlocks next month. Your savings still moved.</div>
+                </div>
+              </sc-if>
+              <div style="width:100%;display:flex;flex-direction:column;gap:10px;padding-top:12px">
+                <div style="height:56px;border-radius:10px;background:#C8F135;color:#0C2321;display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">See rewards</div>
+                <div style="height:56px;border-radius:10px;border:1.5px solid #E9F1ED;color:#E9F1ED;display:flex;align-items:center;justify-content:center;font:500 16px 'Hanken Grotesk',sans-serif">Back to goals</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 12 REWARDS -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">12 Rewards · cash into savings · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:4px 20px 16px;overflow:hidden">
+                <div style="font:800 25px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">Rewards</div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:18px 16px;display:flex;flex-direction:column;gap:16px">
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Your points</div>
+                      <div aria-live="polite" style="font:800 44px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums">140</div>
+                    </div>
+                    <div style="height:36px;padding:0 12px;border-radius:999px;background:var(--lime);color:#0C2321;display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;font-variant-numeric:tabular-nums">= £1.40</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="position:relative;height:20px">
+                      <div style="position:absolute;left:0;right:0;top:7px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                      <div style="position:absolute;left:0;width:28%;top:7px;height:6px;border-radius:999px;background:var(--momentum)"></div>
+                      <div style="position:absolute;left:calc(28% - 10px);top:0;width:20px;height:20px;border-radius:999px;background:var(--momentum);border:3px solid var(--card)"></div>
+                      <div style="position:absolute;left:100%;top:0;bottom:0;width:2px;background:var(--ink);margin-left:-2px"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums"><span>140 pts</span><span style="color:var(--ink)">Next tier 500 pts · £5</span></div>
+                  </div>
+                  <div style="font:400 14px/1.5 'Hanken Grotesk',sans-serif;color:var(--muted)">360 points to go. Roughly 8 ticked habits.</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">One rate the whole way · 100 points = £1.00</div>
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);display:flex;flex-direction:column">
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px">
+                      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">100 points</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--momentum-ink);text-transform:uppercase">Unlocked</div></div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">£1.00</div>
+                    </div>
+                    <div style="height:1px;background:rgba(92,112,107,.18);margin:0 16px"></div>
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px">
+                      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">500 points</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);text-transform:uppercase">360 to go</div></div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">£5.00</div>
+                    </div>
+                    <div style="height:1px;background:rgba(92,112,107,.18);margin:0 16px"></div>
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px">
+                      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">1,200 points</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);text-transform:uppercase">1,060 to go</div></div>
+                      <div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">£12.00</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:16px;display:flex;flex-direction:column;gap:8px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">How this is paid</div>
+                  <div style="font:400 16px/1.55 'Hanken Grotesk',sans-serif;color:var(--ink);max-width:40ch">Cash, straight into your savings — never vouchers. Funded by NatWest's financial education budget.</div>
+                </div>
+                <div style="margin-top:auto;height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">Claim £1.00 into savings</div>
+              </div>
+              <div style="flex:none;height:64px;border-top:1px solid rgba(92,112,107,.22);background:var(--card);display:flex;align-items:center;justify-content:space-around;padding:0 12px">
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l7-6 7 6v8H3z"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">HOME</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">GOALS</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="14" height="9" rx="2"/><path d="M3 10h14"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">REWARDS</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><circle cx="10" cy="10" r="7.2"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">YOU</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 13 SETTINGS -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">13 Settings · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:4px 20px 16px;overflow:hidden">
+                <div style="font:800 25px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">Settings</div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:14px 16px;display:flex;align-items:center;gap:14px;min-height:56px">
+                  <div style="width:48px;height:48px;border-radius:999px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:700 20px 'Bricolage Grotesque',sans-serif">{{ initial }}</div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                    <div style="font:600 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">{{ userName }}</div>
+                    <div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Display name · shows on your dashboard</div>
+                  </div>
+                  <div style="height:44px;padding:0 16px;border-radius:10px;border:1.5px solid var(--ink);color:var(--ink);display:flex;align-items:center;font:500 14px 'Hanken Grotesk',sans-serif">Edit</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Linked accounts</div>
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);display:flex;flex-direction:column">
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px">
+                      <div style="width:36px;height:36px;border-radius:10px;background:rgba(92,112,107,.16);color:var(--ink);display:flex;align-items:center;justify-content:center;font:700 12px 'Bricolage Grotesque',sans-serif">NW</div>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">NatWest</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--momentum-ink);text-transform:uppercase">Connected · 2 accounts</div></div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                    <div style="height:1px;background:rgba(92,112,107,.18);margin:0 16px"></div>
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px">
+                      <div style="width:36px;height:36px;border-radius:10px;background:rgba(92,112,107,.16);color:var(--ink);display:flex;align-items:center;justify-content:center;font:700 12px 'Bricolage Grotesque',sans-serif">CB</div>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">ClearBank</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--momentum-ink);text-transform:uppercase">Connected · 1 account</div></div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                    <div style="height:1px;background:rgba(92,112,107,.18);margin:0 16px"></div>
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px">
+                      <div style="width:36px;height:36px;border-radius:10px;border:1.5px dashed var(--muted);color:var(--ink);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3v12M3 9h12"/></svg></div>
+                      <div style="flex:1;font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Add new account</div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                  </div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);display:flex;flex-direction:column">
+                  <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Notifications</div><div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Weekly habit nudge · Sunday</div></div>
+                    <div style="width:52px;height:32px;border-radius:999px;background:var(--momentum);position:relative;flex:none"><span style="position:absolute;top:3px;left:23px;width:26px;height:26px;border-radius:999px;background:#FFFFFF"></span></div>
+                  </div>
+                  <div style="height:1px;background:rgba(92,112,107,.18);margin:0 16px"></div>
+                  <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px">
+                    <div style="flex:1;font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">About Able AI</div>
+                    <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                  </div>
+                </div>
+                <div style="font:400 12px/1.6 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted)">Able AI never holds your money. Rewards are funded by partner banks' education budgets.</div>
+              </div>
+              <div style="flex:none;height:64px;border-top:1px solid rgba(92,112,107,.22);background:var(--card);display:flex;align-items:center;justify-content:space-around;padding:0 12px">
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l7-6 7 6v8H3z"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">HOME</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">GOALS</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="14" height="9" rx="2"/><path d="M3 10h14"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">REWARDS</span></div>
+                <div style="width:56px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><circle cx="10" cy="10" r="7.2"/></svg><span style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em">YOU</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- 14 ZERO LEFTOVER -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">14 Zero leftover · the empathy screen · {{ t.name }}</div>
+          <div style="padding:10px;background:#0C2321;border-radius:28px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22)">
+            <div style="width:390px;height:844px;background:var(--ground);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+              <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex:none;font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--ink)"><span>9:41</span><span style="width:18px;height:9px;border:1.5px solid var(--ink);border-radius:2px;opacity:.55"></span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:4px 20px 16px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink);margin-left:-10px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="transform:rotate(180deg)"><path d="M6 3l5 5-5 5"/></svg></span>
+                  <span style="font-size:20px;line-height:1">🏠</span>
+                  <div style="flex:1;font:700 20px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">House deposit £13,000</div>
+                </div>
+                <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:18px 16px;display:flex;flex-direction:column;gap:14px">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Left over last month</div>
+                  <div aria-live="polite" style="font:800 44px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums">£0.00</div>
+                  <div style="font:400 16px/1.55 'Hanken Grotesk',sans-serif;color:var(--ink);max-width:38ch">Your money went out as fast as it came in, so we cannot put a date on this goal yet. We will not guess one.</div>
+                  <div style="position:relative;height:16px">
+                    <div style="position:absolute;left:0;right:0;top:5px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div>
+                    <div style="position:absolute;left:17.5%;top:0;bottom:0;width:2px;background:var(--ink)"></div>
+                    <div style="position:absolute;left:0;top:0;width:16px;height:16px;border-radius:999px;border:2px solid var(--muted);background:var(--card)"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)"><span>No movement yet</span><span style="color:var(--ink)">Target 65w</span></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;overflow:hidden">
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Three habits that would free up money</div>
+                  <div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);display:flex;flex-direction:column">
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                      <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:3px"><div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Skip 3 coffees this week</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£10.50/WK · 15 PTS</div></div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                    <div style="height:1px;background:rgba(92,112,107,.18);margin:0 14px"></div>
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                      <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:3px"><div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Pack lunch 2 days</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£8.20/WK · 12 PTS</div></div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                    <div style="height:1px;background:rgba(92,112,107,.18);margin:0 14px"></div>
+                    <div style="min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px">
+                      <span style="width:44px;height:44px;border-radius:999px;border:1.5px solid var(--muted);flex:none"></span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:3px"><div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--ink)">Round card payments up to the nearest £1</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);font-variant-numeric:tabular-nums">+£4.30/WK · 10 PTS</div></div>
+                      <span style="color:var(--muted)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg></span>
+                    </div>
+                  </div>
+                  <div style="font:400 14px/1.5 'Hanken Grotesk',sans-serif;color:var(--muted)">Tick one and we will start measuring the distance from real money, not a guess.</div>
+                </div>
+                <div style="margin-top:auto;height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">Start with one habit</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- COMPONENT SHEET -->
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+      <div style="{{ t.vars }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#5C706B">Sheet · tokens, type, components · {{ t.name }}</div>
+          <div style="width:900px;background:var(--ground);border-radius:28px;padding:36px;display:flex;flex-direction:column;gap:32px">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Brandmark · ink ribbon, green arrow</div>
+              <div style="display:flex;align-items:center;gap:16px">
+                <svg width="72" height="72" viewBox="0 0 120 120" fill="none" role="img" aria-label="Able AI">
+                  <path d="M26 104L58 28L90 104" stroke="var(--ink)" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="M22 88C42 86 46 68 64 63C79 59 86 50 97 36" stroke="var(--momentum)" stroke-width="13" stroke-linecap="round"></path>
+                  <path d="M112 16L107 44L86 28Z" fill="var(--momentum)"></path>
+                </svg>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <div style="font:700 31px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.04em;color:var(--ink)">ABLE AI</div>
+                  <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Turning little habits into big benefits</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Tokens</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <div style="width:132px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:var(--ink)"></div><div style="font:400 12px/1.3 'DM Mono',monospace;color:var(--muted)">--ink</div></div>
+                <div style="width:132px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:var(--ground);border:1px solid rgba(92,112,107,.4)"></div><div style="font:400 12px/1.3 'DM Mono',monospace;color:var(--muted)">--ground</div></div>
+                <div style="width:132px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:var(--card);border:1px solid rgba(92,112,107,.28)"></div><div style="font:400 12px/1.3 'DM Mono',monospace;color:var(--muted)">--card</div></div>
+                <div style="width:132px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:var(--momentum)"></div><div style="font:400 12px/1.3 'DM Mono',monospace;color:var(--muted)">--momentum</div></div>
+                <div style="width:132px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:var(--momentum-soft)"></div><div style="font:400 12px/1.3 'DM Mono',monospace;color:var(--muted)">--momentum-soft</div></div>
+                <div style="width:132px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:var(--lime)"></div><div style="font:400 12px/1.3 'DM Mono',monospace;color:var(--muted)">--lime</div></div>
+                <div style="width:132px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:var(--slip)"></div><div style="font:400 12px/1.3 'DM Mono',monospace;color:var(--muted)">--slip</div></div>
+                <div style="width:132px;display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:var(--muted)"></div><div style="font:400 12px/1.3 'DM Mono',monospace;color:var(--muted)">--muted</div></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:40px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Display · Bricolage Grotesque 800</div>
+                <div style="font:800 56px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums">38 weeks</div>
+                <div style="font:800 31px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:var(--ink)">Turning little habits</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;max-width:34ch">
+                <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Body · Hanken Grotesk 400/600</div>
+                <div style="font:400 16px/1.55 'Hanken Grotesk',sans-serif;color:var(--ink)">Time is the material. Every number on screen traces back to a real transaction.</div>
+                <div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Instrument · DM Mono +0.08em</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Chip</div><div style="display:flex;gap:8px"><span style="height:36px;padding:0 14px;border-radius:999px;background:var(--ink);color:var(--ground);display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em">SELECTED</span><span style="height:36px;padding:0 14px;border-radius:999px;background:rgba(92,112,107,.16);color:var(--ink);display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em">IDLE</span></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Primary 56px</div><div style="height:56px;border-radius:10px;background:var(--ink);color:var(--ground);display:flex;align-items:center;justify-content:center;font:600 16px 'Hanken Grotesk',sans-serif">Create new goal</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Ghost</div><div style="height:56px;border-radius:10px;border:1.5px solid var(--ink);color:var(--ink);display:flex;align-items:center;justify-content:center;font:500 16px 'Hanken Grotesk',sans-serif">Log in</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Stat pair</div><div style="display:flex;gap:20px"><div style="display:flex;flex-direction:column;gap:4px"><div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Needs</div><div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">£197/wk</div></div><div style="display:flex;flex-direction:column;gap:4px"><div style="font:400 12px/1.3 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Spare</div><div style="font:700 25px/1 'Bricolage Grotesque',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums">£35/wk</div></div></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Timeline rail</div><div style="position:relative;height:24px"><div style="position:absolute;left:0;right:0;top:9px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div><div style="position:absolute;left:0;width:56%;top:9px;height:6px;border-radius:999px;background:var(--momentum)"></div><div style="position:absolute;left:80%;top:0;bottom:0;width:2px;background:var(--ink)"></div><div style="position:absolute;left:calc(56% - 11px);top:1px;width:22px;height:22px;border-radius:999px;background:var(--momentum);border:3px solid var(--card)"></div></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Points counter</div><div style="display:flex;gap:8px"><span style="height:32px;padding:0 12px;border-radius:999px;background:var(--lime);color:#0C2321;display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;font-variant-numeric:tabular-nums">+45 PTS</span><span style="height:32px;padding:0 12px;border-radius:999px;background:rgba(92,112,107,.16);color:var(--ink);display:flex;align-items:center;font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;font-variant-numeric:tabular-nums">140 PTS</span></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Goal card</div><div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">👟</span><div style="flex:1;font:600 16px 'Hanken Grotesk',sans-serif;color:var(--ink)">Sneakers</div><div style="font:700 20px/1 'Bricolage Grotesque',sans-serif;color:var(--momentum-ink);font-variant-numeric:tabular-nums">5w</div></div><div style="position:relative;height:16px"><div style="position:absolute;left:0;right:0;top:5px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div><div style="position:absolute;left:0;width:62%;top:5px;height:6px;border-radius:999px;background:var(--momentum)"></div><div style="position:absolute;left:88%;top:0;bottom:0;width:2px;background:var(--ink)"></div></div></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Habit row 56px</div><div style="background:var(--card);border-radius:18px;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);min-height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px"><span style="width:44px;height:44px;border-radius:999px;background:var(--momentum);color:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9.5l3.2 3.2L14 6"/></svg></span><div style="flex:1;display:flex;flex-direction:column;gap:3px"><div style="font:500 16px/1.2 'Hanken Grotesk',sans-serif;color:var(--momentum-ink);text-decoration:line-through">Pack lunch 2 days</div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.06em;color:var(--momentum-ink);font-variant-numeric:tabular-nums">+£8.20/WK · 12 PTS</div></div></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Reward bar</div><div style="position:relative;height:20px"><div style="position:absolute;left:0;right:0;top:7px;height:6px;border-radius:999px;background:rgba(92,112,107,.28)"></div><div style="position:absolute;left:0;width:28%;top:7px;height:6px;border-radius:999px;background:var(--momentum)"></div><div style="position:absolute;left:calc(28% - 10px);top:0;width:20px;height:20px;border-radius:999px;background:var(--momentum);border:3px solid var(--card)"></div></div><div style="font:400 12px/1 'DM Mono',monospace;letter-spacing:.08em;color:var(--muted);font-variant-numeric:tabular-nums">140 / 500 PTS</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Two-segment donut</div><svg width="96" height="96" viewBox="0 0 112 112" style="transform:rotate(-90deg)"><circle cx="56" cy="56" r="46" fill="none" stroke="var(--ink)" stroke-width="16" stroke-dasharray="264.6 289.0"></circle><circle cx="56" cy="56" r="46" fill="none" stroke="var(--momentum)" stroke-width="16" stroke-dasharray="24.4 289.0" stroke-dashoffset="-264.6"></circle></svg></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Tab bar</div><div style="background:var(--card);border-radius:18px;border:1px solid rgba(92,112,107,.22);height:64px;display:flex;align-items:center;justify-content:space-around"><span style="color:var(--ink)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l7-6 7 6v8H3z"/></svg></span><span style="color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2"/></svg></span><span style="color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="14" height="9" rx="2"/><path d="M3 10h14"/></svg></span><span style="color:var(--muted)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><circle cx="10" cy="10" r="7.2"/></svg></span></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Sheet</div><div style="background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 1px 2px rgba(12,35,33,.06),0 8px 24px -12px rgba(12,35,33,.22);padding:12px 16px 24px;display:flex;flex-direction:column;gap:12px;align-items:center"><span style="width:44px;height:4px;border-radius:999px;background:rgba(92,112,107,.4)"></span><div style="font:600 16px 'Hanken Grotesk',sans-serif;color:var(--ink)">Edit target</div></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px"><div style="font:400 12px/1.4 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Celebration overlay</div><div style="background:#08110F;border-radius:18px;height:104px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden"><div style="position:absolute;width:180px;height:180px;border-radius:999px;background:rgba(200,241,53,.16)"></div><div style="position:relative;font:800 25px/1 'Bricolage Grotesque',sans-serif;color:#C8F135;font-variant-numeric:tabular-nums">+100 pts</div></div></div>
+            </div>
+            <div style="font:400 12px/1.6 'DM Mono',monospace;letter-spacing:.06em;color:var(--muted);max-width:70ch">Radii 10 · 18 · 28 · 999 · spacing 4 8 12 16 24 32 48 · one shadow token · green only when the week count drops · lime only for earned rewards · amber replaces red entirely.</div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:900},&quot;themesShown&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;both&quot;,&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Canvas&quot;},&quot;userName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Maya&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+const LIGHT = {
+  '--ink': '#0C2321', '--ground': '#EEF2ED', '--card': '#FFFFFF',
+  '--momentum': '#0E9F6E', '--momentum-ink': '#0A7250', '--momentum-soft': '#DDF1E8',
+  '--lime': '#C8F135', '--slip': '#B4721A', '--slip-ink': '#8A5610', '--slip-soft': '#F6E7D2',
+  '--muted': '#5C706B'
+};
+const DARK = {
+  '--ink': '#E9F1ED', '--ground': '#08110F', '--card': '#12211E',
+  '--momentum': '#2FBF8B', '--momentum-ink': '#2FBF8B', '--momentum-soft': '#12332A',
+  '--lime': '#C8F135', '--slip': '#D99A3D', '--slip-ink': '#D99A3D', '--slip-soft': '#2A2013',
+  '--muted': '#8FA39D'
+};
+
+const HABITS = [
+  { id: 'coffee', label: 'Skip 3 coffees this week', meta: '+£10.50/WK · 15 PTS', weeks: 11, pts: 15, group: 'Reductive' },
+  { id: 'lunch', label: 'Pack lunch 2 days', meta: '+£8.20/WK · 12 PTS', weeks: 8, pts: 12, group: 'Reductive' },
+  { id: 'sweep', label: "Sweep what's left the day before payday", meta: '+£14.00/WK · 18 PTS', weeks: 11, pts: 18, group: 'Productive' },
+  { id: 'round', label: 'Round card payments up to the nearest £1', meta: '+£4.30/WK · 10 PTS', weeks: 4, pts: 10, group: 'Productive' }
+];
+
+const BASE_WEEKS = 68;
+const TARGET_WEEKS = 65;
+const SHADOW = '0 1px 2px rgba(12,35,33,.06), 0 8px 24px -12px rgba(12,35,33,.22)';
+const MONO = "400 12px/1 'DM Mono', monospace";
+
+class Component extends DCLogic {
+  state = { ticked: { coffee: true, lunch: true, sweep: true, round: false } };
+
+  toggle(id) {
+    this.setState(s => ({ ticked: Object.assign({}, s.ticked, { [id]: !s.ticked[id] }) }));
+  }
+
+  renderVals() {
+    const show = this.props.themesShown ?? 'both';
+    const userName = this.props.userName ?? 'Maya';
+    const themes = [];
+    if (show !== 'dark') themes.push({ name: 'Light', vars: LIGHT });
+    if (show !== 'light') themes.push({ name: 'Dark', vars: DARK });
+
+    const ticked = this.state.ticked;
+    const saved = HABITS.reduce((a, h) => a + (ticked[h.id] ? h.weeks : 0), 0);
+    const points = HABITS.reduce((a, h) => a + (ticked[h.id] ? h.pts : 0), 0);
+    const weeks = BASE_WEEKS - saved;
+    const dropped = saved > 0;
+    const pct = Math.max(4, (weeks / BASE_WEEKS) * 100);
+    const onTrack = weeks <= TARGET_WEEKS;
+    const fillColor = onTrack ? 'var(--momentum)' : 'var(--slip)';
+
+    const habits = HABITS.map(h => {
+      const on = !!ticked[h.id];
+      return {
+        label: h.label,
+        meta: h.meta,
+        ticked: on,
+        toggle: () => this.toggle(h.id),
+        rowStyle: {
+          background: on ? 'var(--momentum-soft)' : 'var(--card)',
+          borderRadius: 18,
+          boxShadow: SHADOW,
+          minHeight: 56,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '8px 14px',
+          transition: 'background 240ms ease'
+        },
+        tickStyle: {
+          width: 44, height: 44, borderRadius: 999, flex: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: on ? 'var(--momentum)' : 'transparent',
+          color: on ? '#FFFFFF' : 'var(--muted)',
+          border: on ? '1.5px solid var(--momentum)' : '1.5px solid var(--muted)',
+          transition: 'background 200ms ease, border-color 200ms ease'
+        },
+        labelStyle: {
+          font: "500 16px/1.2 'Hanken Grotesk', sans-serif",
+          color: on ? 'var(--momentum-ink)' : 'var(--ink)',
+          textDecoration: on ? 'line-through' : 'none'
+        },
+        metaStyle: {
+          font: MONO, letterSpacing: '.06em', fontVariantNumeric: 'tabular-nums',
+          color: on ? 'var(--momentum-ink)' : 'var(--muted)'
+        }
+      };
+    });
+
+    const caseBase = {
+      pick1: { width: 48, height: 48, borderRadius: 999, background: 'var(--card)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 },
+      pick2: { width: 48, height: 48, borderRadius: 999, background: 'var(--card)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }
+    };
+    const selected = { width: 48, height: 48, borderRadius: 999, background: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, outline: '2px solid var(--ink)', outlineOffset: 2 };
+
+    const cases = [];
+    themes.forEach(t => {
+      cases.push({
+        vars: t.vars, label: t.name + ' · easy · Sneakers', emoji: '👟', name: 'Sneakers',
+        amount: '£180', read: 'At £35 a week you arrive in 5 weeks. Comfortable.',
+        readColor: 'var(--momentum-ink)',
+        pick1: caseBase.pick1, pick2: selected
+      });
+      cases.push({
+        vars: t.vars, label: t.name + ' · hard · House deposit', emoji: '🏠', name: 'House deposit',
+        amount: '£13,000', read: 'At £35 a week this is 372 weeks away. We will show you a route.',
+        readColor: 'var(--slip-ink)',
+        pick1: selected, pick2: caseBase.pick2
+      });
+    });
+
+    const novDays = [];
+    for (let i = 0; i < 35; i++) {
+      const n = i - 0;
+      const day = n + 1;
+      const inMonth = day >= 1 && day <= 30;
+      const isSel = day === 19;
+      novDays.push({
+        n: inMonth ? String(day) : '',
+        style: {
+          height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderRadius: 999,
+          background: isSel ? 'var(--ink)' : 'transparent',
+          color: isSel ? 'var(--ground)' : (inMonth ? 'var(--ink)' : 'transparent'),
+          opacity: inMonth ? 1 : 0
+        }
+      });
+    }
+
+    const celebrations = [
+      {
+        label: 'reward earned', capped: false, points: '+100 points',
+        pointsStyle: { font: "800 44px/1 'Bricolage Grotesque', sans-serif", letterSpacing: '-.03em', color: '#C8F135', fontVariantNumeric: 'tabular-nums' },
+        body: '£1.00 goes into your savings, funded by NatWest. One rate the whole way: 100 points = £1.00.'
+      },
+      {
+        label: 'capped variant', capped: true, points: '0 points',
+        pointsStyle: { font: "800 44px/1 'Bricolage Grotesque', sans-serif", letterSpacing: '-.03em', color: '#8FA39D', fontVariantNumeric: 'tabular-nums' },
+        body: 'The goal still counts. The reward does not, this month.'
+      }
+    ];
+
+    return {
+      themes, goalCases: cases, novDays, celebrations, habits,
+      userName, initial: userName.trim().charAt(0).toUpperCase() || 'M',
+      weeks, points,
+      tickedCount: HABITS.filter(h => ticked[h.id]).length,
+      weeksStyle: {
+        font: "800 44px/1 'Bricolage Grotesque', sans-serif", letterSpacing: '-.03em',
+        fontVariantNumeric: 'tabular-nums',
+        color: dropped ? (onTrack ? 'var(--momentum-ink)' : 'var(--slip-ink)') : 'var(--slip-ink)',
+        transition: 'color 240ms ease'
+      },
+      deltaLabel: dropped ? saved + 'w closer' : 'No change yet',
+      deltaChipStyle: {
+        height: 36, padding: '0 12px', borderRadius: 999, display: 'flex', alignItems: 'center',
+        font: MONO, letterSpacing: '.08em', textTransform: 'uppercase',
+        fontVariantNumeric: 'tabular-nums',
+        background: dropped ? 'var(--momentum-soft)' : 'rgba(92,112,107,.16)',
+        color: dropped ? 'var(--momentum-ink)' : 'var(--muted)'
+      },
+      railFillStyle: {
+        position: 'absolute', left: 0, top: 9, height: 6, borderRadius: 999,
+        width: pct + '%', background: fillColor, transition: 'width 360ms cubic-bezier(.22,.61,.36,1), background 240ms ease'
+      },
+      railMarkerStyle: {
+        position: 'absolute', top: 1, left: 'calc(' + pct + '% - 11px)', width: 22, height: 22,
+        borderRadius: 999, background: fillColor, border: '3px solid var(--card)',
+        transition: 'left 360ms cubic-bezier(.22,.61,.36,1), background 240ms ease'
+      },
+      railCaption: dropped
+        ? saved + ' weeks came off the wait. ' + (onTrack ? 'You are inside the goalpost.' : 'Still short of the goalpost.')
+        : 'Tick a habit and the week count moves. Nothing else changes it.'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

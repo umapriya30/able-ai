@@ -1,18 +1,23 @@
 import type {
+  AIHabitSuggestion,
   Bank,
   ClaimRewardResponse,
   CustomHabitInput,
   GoalCompleteResponse,
+  GoalCreateInput,
   GoalEditInput,
   Goal,
   HabitEntry,
   HabitLibraryEntry,
   HabitToggleResponse,
+  LinkBankResponse,
   LoginResponse,
   Profile,
+  ProfileEditInput,
   RewardRules,
   SavingsHistoryPoint,
   SignupInput,
+  SpendSaveSummary,
   TimelineResult,
 } from "./types";
 
@@ -31,6 +36,30 @@ export const api = {
 
   getProfile: (profileId: string) =>
     fetch(`${BASE}/profiles/${profileId}`).then((r) => json<Profile>(r)),
+
+  editProfile: (profileId: string, payload: ProfileEditInput) =>
+    fetch(`${BASE}/profiles/${profileId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).then((r) => json<Profile>(r)),
+
+  getSpendSummary: (profileId: string, days = 30) =>
+    fetch(`${BASE}/profiles/${profileId}/spend-summary?days=${days}`).then((r) =>
+      json<SpendSaveSummary>(r)
+    ),
+
+  linkBank: (profileId: string) =>
+    fetch(`${BASE}/profiles/${profileId}/banks/link`, { method: "POST" }).then((r) =>
+      json<LinkBankResponse>(r)
+    ),
+
+  createGoal: (profileId: string, payload: GoalCreateInput) =>
+    fetch(`${BASE}/profiles/${profileId}/goals`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).then((r) => json<Goal>(r)),
 
   getTimeline: (profileId: string, goalId: string, lever: number) =>
     fetch(`${BASE}/profiles/${profileId}/goals/${goalId}/timeline?lever=${lever}`).then((r) =>
@@ -64,6 +93,16 @@ export const api = {
     fetch(`${BASE}/profiles/${profileId}/goals/${goalId}/complete`, {
       method: "POST",
     }).then((r) => json<GoalCompleteResponse>(r)),
+
+  getAIHabits: (profileId: string, goalId: string) =>
+    fetch(`${BASE}/profiles/${profileId}/ai-habits/${goalId}`).then((r) =>
+      json<AIHabitSuggestion[]>(r)
+    ),
+
+  narratePlan: (profileId: string, goalId: string) =>
+    fetch(`${BASE}/profiles/${profileId}/ai-habits/${goalId}/narrate`, { method: "POST" }).then(
+      (r) => json<{ narration: string }>(r)
+    ),
 
   resetDemo: () => fetch(`${BASE}/demo/reset`, { method: "POST" }).then((r) => json<{ status: string }>(r)),
 

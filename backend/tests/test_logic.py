@@ -109,3 +109,67 @@ def test_habit_points_uncapped_and_small():
     curated = store.PAYLOAD.habitLibrary
     for habit in curated:
         assert 5 <= habit.points <= 25
+
+
+# --- v1.1 contract additions -------------------------------------------------
+
+
+def test_target_date_converts_to_months_on_the_same_constant():
+    from datetime import date
+
+    from logic import DAYS_PER_MONTH, months_from_target_date
+
+    today = date(2026, 8, 27)
+    assert months_from_target_date("2027-08-27", today) == round(365 / DAYS_PER_MONTH, 2)
+    # a date already gone is a tight goal, never a zero or negative timeframe
+    assert months_from_target_date("2026-08-01", today) == 0.25
+
+
+def test_reductive_explanation_quotes_the_users_own_category_spend():
+    from logic import explain_habit
+
+    profile = maya()
+    habit = next(h for h in store.PAYLOAD.habitLibrary if h.habitId == "h_coffee")
+    text = explain_habit(profile, habit)
+    assert "£72/month" in text  # Maya's actual coffee & snacks line
+    assert "£10.50 a week" in text
+
+
+def test_productive_habits_name_no_product_and_no_rate():
+    """docs/03 §3.5 — no advice strings, never a product or rate. The
+    productive half of the Action Center is where that rule is easiest to
+    break, so it's asserted rather than trusted."""
+    from logic import explain_habit
+
+    profile = maya()
+    banned = ("isa", "%", "you should", "interest", "bonus rate")
+    for habit in store.PAYLOAD.habitLibrary:
+        if habit.kind != "productive":
+            continue
+        text = (habit.label + " " + explain_habit(profile, habit)).lower()
+        assert not any(word in text for word in banned), habit.habitId
+
+
+def test_spend_save_split_is_the_payloads_own_monthly_figures():
+    from logic import DAYS_PER_MONTH, spend_save_split
+
+    profile = maya()
+    spent, saved = spend_save_split(profile, 30)
+    scale = 30 / DAYS_PER_MONTH
+    assert spent == pytest.approx(profile.spending.monthlyTotal * scale, abs=0.01)
+    assert saved == pytest.approx(profile.savings.monthlyAverage * scale, abs=0.01)
+
+
+def test_reward_ladder_runs_at_one_rate():
+    rules = store.PAYLOAD.rewardRules
+    for tier in rules.pointsToRewardTiers:
+        assert tier.points / tier.amountGBP == rules.pointsPerGBP
+        assert tier.fundedBy == "partner_education_budget"
+
+
+def test_every_profile_points_at_a_real_partner_bank():
+    bank_ids = {b.bankId for b in store.PAYLOAD.banks}
+    assert bank_ids == {"natwest", "clearbank", "allica"}
+    for profile in store.PAYLOAD.profiles:
+        assert profile.bankId in bank_ids
+        assert profile.linkedBankIds and set(profile.linkedBankIds) <= bank_ids

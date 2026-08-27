@@ -1,4 +1,4 @@
-"""Generates data/dummy-bank-payload.json: 50 profiles spread across 5 fictional
+"""Generates data/dummy-bank-payload.json: 50 profiles spread across the 3 named
 partner banks and 4 persona archetypes, plus an expanded habit library.
 
 Run with: .venv/Scripts/python.exe scripts/generate_demo_data.py
@@ -19,12 +19,13 @@ OUT_FILE = Path(__file__).resolve().parents[2] / "data" / "dummy-bank-payload.js
 
 random.seed(7)
 
+# The three partner banks the pitch names. Changing this list only changes which
+# bank each profile is assigned to (bank_ids[count % len]) — it consumes no RNG,
+# so every generated profile's figures stay byte-identical across this change.
 BANKS = [
-    {"bankId": "demo-bank", "displayName": "Demo Bank", "consentGrantedAt": "2026-08-20T09:12:00Z", "scopes": ["accounts:read", "transactions:read"]},
-    {"bankId": "northbridge", "displayName": "Northbridge Bank", "consentGrantedAt": "2026-08-19T11:04:00Z", "scopes": ["accounts:read", "transactions:read"]},
-    {"bankId": "meridian-digital", "displayName": "Meridian Digital", "consentGrantedAt": "2026-08-21T08:47:00Z", "scopes": ["accounts:read", "transactions:read"]},
-    {"bankId": "clearwater-cu", "displayName": "Clearwater Credit Union", "consentGrantedAt": "2026-08-18T14:30:00Z", "scopes": ["accounts:read", "transactions:read"]},
-    {"bankId": "pinnacle-money", "displayName": "Pinnacle Money", "consentGrantedAt": "2026-08-22T10:15:00Z", "scopes": ["accounts:read", "transactions:read"]},
+    {"bankId": "natwest", "displayName": "NatWest", "consentGrantedAt": "2026-08-20T09:12:00Z", "scopes": ["accounts:read", "transactions:read"]},
+    {"bankId": "clearbank", "displayName": "ClearBank", "consentGrantedAt": "2026-08-19T11:04:00Z", "scopes": ["accounts:read", "transactions:read"]},
+    {"bankId": "allica", "displayName": "Allica Bank", "consentGrantedAt": "2026-08-21T08:47:00Z", "scopes": ["accounts:read", "transactions:read"]},
 ]
 
 NAMES = [
@@ -152,6 +153,7 @@ def gen_profile(user_id: str, name: str, persona: str, bank_id: str) -> dict:
         "ageBand": a["ageBand"],
         "persona": persona,
         "bankId": bank_id,
+        "linkedBankIds": [bank_id],
         "accounts": [account],
         "income": {
             "monthlyNet": income,
@@ -176,7 +178,7 @@ def gen_profile(user_id: str, name: str, persona: str, bank_id: str) -> dict:
 
 MAYA = {
     "userId": "u_maya", "displayName": "Maya", "age": 23, "ageBand": "18-25",
-    "persona": "young_professional", "bankId": "demo-bank",
+    "persona": "young_professional", "bankId": "natwest", "linkedBankIds": ["natwest"],
     "accounts": [
         {"accountId": "acc_maya_current", "type": "current", "balance": 1284.5, "currency": "GBP"},
         {"accountId": "acc_maya_savings", "type": "savings", "balance": 640.0, "currency": "GBP"},
@@ -204,7 +206,7 @@ MAYA = {
 
 JAYDEN = {
     "userId": "u_jayden", "displayName": "Jayden", "age": 18, "ageBand": "18-25",
-    "persona": "secondary_school", "bankId": "demo-bank",
+    "persona": "secondary_school", "bankId": "clearbank", "linkedBankIds": ["clearbank"],
     "accounts": [{"accountId": "acc_jayden_current", "type": "current", "balance": 86.4, "currency": "GBP"}],
     "income": {"monthlyNet": 120.0, "paydayDayOfMonth": 1, "confidence": "medium", "sources": ["part_time", "allowance"]},
     "spending": {
@@ -224,26 +226,38 @@ JAYDEN = {
     "points": {"balance": 60, "lifetime": 60, "lastGoalRewardAt": None},
 }
 
+# Two kinds, because the Action Center has two halves:
+#   reductive  — spend less in a category the profile already spends in
+#   productive — move money that is already theirs somewhere it counts
+# Productive habits deliberately name no product and no rate (docs/03 §3.5).
+# Their categoryId is not a spending category, so the engine reads their
+# weeklySaving straight from here rather than deriving it from a 30% cut.
 HABIT_LIBRARY = [
-    {"habitId": "h_coffee", "label": "Skip 3 coffees this week", "categoryId": "coffee", "weeklySaving": 10.5, "points": 10, "personas": ["young_professional"]},
-    {"habitId": "h_lunch", "label": "Pack lunch 2 days", "categoryId": "eating_out", "weeklySaving": 14.0, "points": 15, "personas": ["young_professional"]},
-    {"habitId": "h_subs", "label": "Cancel one unused subscription", "categoryId": "subs", "weeklySaving": 2.75, "points": 20, "personas": ["young_professional", "secondary_school", "university_student", "gig_worker"]},
-    {"habitId": "h_walk", "label": "Walk 2 journeys instead of tap in", "categoryId": "transport", "weeklySaving": 5.6, "points": 10, "personas": ["young_professional", "secondary_school"]},
-    {"habitId": "h_snacks", "label": "Snack budget: 3 days at school", "categoryId": "lunch", "weeklySaving": 4.5, "points": 10, "personas": ["secondary_school"]},
-    {"habitId": "h_gaming", "label": "No in-game top-ups this week", "categoryId": "gaming", "weeklySaving": 3.25, "points": 15, "personas": ["secondary_school"]},
-    {"habitId": "h_takeaway", "label": "Skip 2 takeaways this week", "categoryId": "takeaways", "weeklySaving": 9.0, "points": 15, "personas": ["university_student", "gig_worker"]},
-    {"habitId": "h_nightsout", "label": "One fewer night out this month", "categoryId": "nights_out", "weeklySaving": 6.5, "points": 15, "personas": ["university_student"]},
-    {"habitId": "h_shopping", "label": "Pause one non-essential purchase this week", "categoryId": "shopping", "weeklySaving": 5.0, "points": 10, "personas": ["young_professional", "university_student", "gig_worker"]},
-    {"habitId": "h_fuel", "label": "Plan routes to save a tank of fuel a month", "categoryId": "fuel_transport", "weeklySaving": 8.0, "points": 15, "personas": ["gig_worker"]},
+    {"habitId": "h_coffee", "label": "Skip 3 coffees this week", "categoryId": "coffee", "weeklySaving": 10.5, "points": 10, "kind": "reductive", "personas": ["young_professional"]},
+    {"habitId": "h_lunch", "label": "Pack lunch 2 days", "categoryId": "eating_out", "weeklySaving": 14.0, "points": 15, "kind": "reductive", "personas": ["young_professional"]},
+    {"habitId": "h_subs", "label": "Cancel one unused subscription", "categoryId": "subs", "weeklySaving": 2.75, "points": 20, "kind": "reductive", "personas": ["young_professional", "secondary_school", "university_student", "gig_worker"]},
+    {"habitId": "h_walk", "label": "Walk 2 journeys instead of tap in", "categoryId": "transport", "weeklySaving": 5.6, "points": 10, "kind": "reductive", "personas": ["young_professional", "secondary_school"]},
+    {"habitId": "h_snacks", "label": "Snack budget: 3 days at school", "categoryId": "lunch", "weeklySaving": 4.5, "points": 10, "kind": "reductive", "personas": ["secondary_school"]},
+    {"habitId": "h_gaming", "label": "No in-game top-ups this week", "categoryId": "gaming", "weeklySaving": 3.25, "points": 15, "kind": "reductive", "personas": ["secondary_school"]},
+    {"habitId": "h_takeaway", "label": "Skip 2 takeaways this week", "categoryId": "takeaways", "weeklySaving": 9.0, "points": 15, "kind": "reductive", "personas": ["university_student", "gig_worker"]},
+    {"habitId": "h_nightsout", "label": "One fewer night out this month", "categoryId": "nights_out", "weeklySaving": 6.5, "points": 15, "kind": "reductive", "personas": ["university_student"]},
+    {"habitId": "h_shopping", "label": "Pause one non-essential purchase this week", "categoryId": "shopping", "weeklySaving": 5.0, "points": 10, "kind": "reductive", "personas": ["young_professional", "university_student", "gig_worker"]},
+    {"habitId": "h_fuel", "label": "Plan routes to save a tank of fuel a month", "categoryId": "fuel_transport", "weeklySaving": 8.0, "points": 15, "kind": "reductive", "personas": ["gig_worker"]},
+    {"habitId": "h_sweep", "label": "Sweep what's left the day before payday", "categoryId": "idle_cash", "weeklySaving": 6.0, "points": 15, "kind": "productive", "personas": ["young_professional", "university_student", "gig_worker"]},
+    {"habitId": "h_roundups", "label": "Round card payments up to the nearest £1", "categoryId": "roundups", "weeklySaving": 2.5, "points": 10, "kind": "productive", "personas": ["young_professional", "secondary_school", "university_student", "gig_worker"]},
+    {"habitId": "h_payday_move", "label": "Move a set amount to savings on payday", "categoryId": "payday_transfer", "weeklySaving": 4.6, "points": 15, "kind": "productive", "personas": ["young_professional", "gig_worker"]},
 ]
 
 REWARD_RULES = {
     "goalCompletionPoints": 100,
     "goalRewardCapPerMonth": 1,
+    # One rate the whole way up: 100 points = £1.00, cash to savings, never a
+    # voucher. A judge doing mental arithmetic on any tier gets the same answer.
+    "pointsPerGBP": 100,
     "pointsToRewardTiers": [
-        {"points": 250, "reward": "£5 credit", "amountGBP": 5.0, "fundedBy": "partner_education_budget"},
-        {"points": 600, "reward": "£15 credit", "amountGBP": 15.0, "fundedBy": "partner_education_budget"},
-        {"points": 1200, "reward": "£40 credit", "amountGBP": 40.0, "fundedBy": "partner_education_budget"},
+        {"points": 100, "reward": "£1 cash bonus", "amountGBP": 1.0, "fundedBy": "partner_education_budget"},
+        {"points": 500, "reward": "£5 cash bonus", "amountGBP": 5.0, "fundedBy": "partner_education_budget"},
+        {"points": 1200, "reward": "£12 cash bonus", "amountGBP": 12.0, "fundedBy": "partner_education_budget"},
     ],
 }
 
@@ -271,16 +285,18 @@ def main():
         count += 1
 
     payload = {
-        "schemaVersion": "1.0",
+        "schemaVersion": "1.1",
         "_note": (
             "Universal API payload. This is the ONE shape every partner bank routes to Able "
-            "AI. 50 demo profiles across 5 fictional partner banks and 4 persona archetypes "
+            "AI. 50 demo profiles across the 3 partner banks (NatWest, ClearBank, Allica Bank) "
+            "and 4 persona archetypes "
             "(young_professional, secondary_school, university_student, gig_worker) — "
             "generated by scripts/generate_demo_data.py with a fixed seed, so it is "
             "reproducible, not random each run. Maya and Jayden are hand-tuned and kept fixed "
             "because the test suite and demo script reference their exact figures. Owner of "
             "the contract: Product & Design (Anton). Owner of the engine that consumes it: "
-            "Builder (Priya)."
+            "Builder (Priya). v1.1 adds linkedBankIds (Settings can link a second bank), "
+            "habit kind (reductive | productive), and a single-rate reward ladder."
         ),
         "banks": BANKS,
         "profiles": profiles,

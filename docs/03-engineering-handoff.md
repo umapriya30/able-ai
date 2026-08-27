@@ -52,13 +52,42 @@ weeks          = ceil(max(0, target − saved) / weekly)
 
 ---
 
+## 2.1 Payload v1.1 — what Temi's prototype spec added
+
+`schemaVersion` is now `1.1`. Four changes, all additive except the bank roster:
+
+| Change | Where | Why |
+|---|---|---|
+| Banks are **NatWest, ClearBank, Allica Bank** | `banks[]` | The three the pitch names. The five invented banks are gone; every profile's `bankId` was remapped, no other figure moved |
+| `linkedBankIds: string[]` | every profile | Settings → "Add new account" connects a second bank. `bankId` (the bank that routed them to us, and the funder named on the rewards screen) never changes |
+| `kind: "reductive" \| "productive"` | every `habitLibrary` entry | The Action Center has two halves: spend less in a category they already spend in, or move money that is already theirs. The engine treats both identically — it is £/week either way — so `kind` only drives grouping and copy |
+| One reward rate: `pointsPerGBP: 100` | `rewardRules` | 100 points = £1.00 cash, at every tier (100/£1, 500/£5, 1200/£12). A judge doing mental arithmetic on any tier gets the same answer. Still cash to savings, still funded by `partner_education_budget`, never a voucher |
+
+Two fields live on the API but deliberately **not** in the payload file, because they only exist once a user has touched something: `Goal.targetDate` (set when the timeframe was picked on the calendar instead of the months slider) and `Profile.preferences.notificationsEnabled`.
+
+`targetDate` is display-only. It is converted to `idealTimeframeMonths` at write time (`logic.months_from_target_date`, days ÷ 30.415 — the same 4.345 constant expressed in days) and **every downstream figure still reads months**. Two sources of truth for one deadline is how they drift apart. A date already in the past floors at 0.25 months rather than going negative.
+
+### Endpoints the prototype spec needs
+
+| Endpoint | Screen |
+|---|---|
+| `GET /profiles/{id}/spend-summary?days=30` | Dashboard donut. Returns **£ spent and £ saved**, not just percentages — the two segments always sum to 100 |
+| `POST /profiles/{id}/goals` | Create New Goal. Send **exactly one** of `idealTimeframeMonths` or `targetDate`; sending both or neither is a 422 |
+| `PATCH /profiles/{id}` | Settings. `displayName` writes to the live profile so the dashboard greeting changes with it; `notificationsEnabled` is the toggle |
+| `POST /profiles/{id}/banks/link` | Settings → Add new account. Picks a partner bank not yet linked; 409 when all three are |
+| `GET /profiles/{id}/habits` | Action Center. Reductive rows first, then productive, each carrying the `explanation` its dropdown shows |
+
+`explanation` is the "where did the AI find this money" dropdown, computed from that profile's own spending: *"You currently spend £72/month on coffee & snacks. This frees up £46/month — £10.50 a week toward the goal."* It is arithmetic on their figures, never advice — see rule 5 below, which the productive habits make easy to break and `tests/test_logic.py` now asserts against.
+
+---
+
 ## 3. Behaviour rules the engine must enforce
 
 1. **Goal reward:** +100 points on completion, hard-capped at **one goal reward per calendar month**, keyed on `lastGoalRewardAt`. When capped, still show the celebration, award 0, and say why (copy is in the prototype). Judges will ask how we stop farming — the answer needs to be visible, not verbal.
 2. **Habit points** are uncapped but small (10–20). The cap belongs on money, not encouragement.
 3. **`weekly ≤ 0`** must never render "∞". Show the zero-leftover state from `docs/01-user-journey.md §7.1`.
 4. **Never round weeks down.** Always `ceil`. Beating your own estimate is a good surprise; missing it is a broken promise.
-5. **No advice strings.** "At this rate", "if you added" — never "you should", never a product or rate.
+5. **No advice strings.** "At this rate", "if you added" — never "you should", never a product or rate. This is why the productive habits say *"Sweep what's left the day before payday"* and not the Lifetime-ISA-and-25%-bonus wording in Temi's spec: naming a regulated product and its rate on stage is the one line docs/05 §3 says loses the room. Same behaviour, safe copy. If Temi wants the product named, that is his call to make explicitly, not ours to slip in.
 
 ---
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { PrimaryButton } from "./Buttons";
 
 interface Shard {
   x: number;
@@ -12,22 +11,33 @@ interface Shard {
   s: number;
 }
 
+// Design board 11. The one moment in the product that earns confetti — a goal
+// finished, never a habit ticked. The stage is dark in BOTH themes (--cel-bg),
+// because a light overlay drops the lime figure to ~1.4:1.
 export function CelebrationOverlay({
   open,
-  emoji,
   goalName,
+  targetAmount,
   awarded,
   capped,
   message,
-  onNext,
+  weeksEarly,
+  partnerName,
+  pointsPerGBP,
+  onSeeRewards,
+  onBack,
 }: {
   open: boolean;
-  emoji: string;
   goalName: string;
+  targetAmount: string;
   awarded: number;
   capped: boolean;
   message: string;
-  onNext: () => void;
+  weeksEarly: number;
+  partnerName: string;
+  pointsPerGBP: number;
+  onSeeRewards: () => void;
+  onBack: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -72,27 +82,51 @@ export function CelebrationOverlay({
     return () => cancelAnimationFrame(raf);
   }, [open, capped]);
 
+  const cash = (awarded / pointsPerGBP).toFixed(2);
+  const headline =
+    weeksEarly > 0 ? `You got there\n${weeksEarly} week${weeksEarly === 1 ? "" : "s"} early` : "You got there";
+
   return (
-    <div className="celebrate" data-open={open ? "true" : "false"} role="dialog" aria-modal="true" aria-labelledby="celTitle">
+    <div
+      className="celebrate"
+      data-open={open ? "true" : "false"}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="celTitle"
+    >
       {!capped && <div className="bloom" />}
       <canvas ref={canvasRef} />
-      <span style={{ fontSize: 31, position: "relative" }}>{emoji}</span>
-      <h2 className="h-lg" id="celTitle" style={{ position: "relative" }}>
-        Goal reached
-      </h2>
-      <p className="small" style={{ margin: 0, opacity: 0.8, position: "relative" }}>
-        {goalName}
-      </p>
-      <span
-        className="num"
-        style={{ position: "relative", fontSize: capped ? 25 : undefined, color: capped ? "var(--slip-on-ink)" : "var(--lime)" }}
-      >
-        +{awarded}
+
+      <span className="eyebrow cel-line">
+        Goal reached · {goalName} {targetAmount}
       </span>
-      <p className="cap">{message}</p>
-      <PrimaryButton id="celNext" onClick={onNext}>
-        Set the next goal
-      </PrimaryButton>
+      <h2 className="num cel-head" id="celTitle">
+        {headline}
+      </h2>
+      <span
+        className="num cel-points"
+        aria-live="polite"
+        style={{ color: capped ? "var(--muted)" : "var(--lime)" }}
+      >
+        {capped ? "0 points" : `+${awarded} points`}
+      </span>
+
+      <p className="cel-body">
+        {capped
+          ? "The goal still counts. The reward does not, this month."
+          : `£${cash} goes into your savings, funded by ${partnerName}. One rate the whole way: ${pointsPerGBP} points = £1.00.`}
+      </p>
+
+      {capped && <p className="cel-capped">{message}</p>}
+
+      <div className="cel-actions">
+        <button id="celNext" className="btn btn-lime" onClick={onSeeRewards}>
+          See rewards
+        </button>
+        <button className="btn btn-onink" onClick={onBack}>
+          Back to goals
+        </button>
+      </div>
     </div>
   );
 }

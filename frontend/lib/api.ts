@@ -104,6 +104,9 @@ export const api = {
       (r) => json<{ narration: string }>(r)
     ),
 
+  seedDemo: () =>
+    fetch(`${BASE}/demo/seed`, { method: "POST" }).then((r) => json<{ added: number }>(r)),
+
   resetDemo: () => fetch(`${BASE}/demo/reset`, { method: "POST" }).then((r) => json<{ status: string }>(r)),
 
   getPayload: () =>

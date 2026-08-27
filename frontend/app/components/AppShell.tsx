@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { money } from "@/lib/format";
 import type {
   Bank,
   HabitEntry,
@@ -9,7 +10,9 @@ import type {
   Profile,
   RewardRules,
   SavingsHistoryPoint,
+  GoalCreateInput,
   SignupInput,
+  SpendSaveSummary,
   TimelineResult,
 } from "@/lib/types";
 import { SCREENS, type ScreenName } from "@/lib/screens";
@@ -17,19 +20,25 @@ import { CelebrationOverlay } from "./CelebrationOverlay";
 import { TabBar } from "./TabBar";
 import { HandoffScreen } from "./screens/HandoffScreen";
 import { HomeScreen } from "./screens/HomeScreen";
+import { GoalBreakdownScreen } from "./screens/GoalBreakdownScreen";
+import { Sheet } from "./Sheet";
 import { NewGoalScreen } from "./screens/NewGoalScreen";
 import { TimelineScreen } from "./screens/TimelineScreen";
 import { HabitsScreen } from "./screens/HabitsScreen";
 import { RewardsScreen } from "./screens/RewardsScreen";
+import { SettingsScreen } from "./screens/SettingsScreen";
 import { LoginScreen } from "./screens/LoginScreen";
+import { WelcomeScreen } from "./screens/WelcomeScreen";
+import { BankLinkScreen } from "./screens/BankLinkScreen";
+import { AnalysingScreen } from "./screens/AnalysingScreen";
 
 const STEPS: { screen: ScreenName; n: string; label: string }[] = [
-  { screen: "handoff", n: "01", label: "Bank hands the user over" },
+  { screen: "linking", n: "01", label: "Connect the bank" },
   { screen: "home", n: "02", label: "Dashboard — how far away?" },
-  { screen: "newgoal", n: "03", label: "Set a goal bucket" },
-  { screen: "timeline", n: "04", label: "AI timeline + the lever" },
-  { screen: "habits", n: "05", label: "Tick a habit, time drops" },
-  { screen: "rewards", n: "06", label: "Points, and who funds them" },
+  { screen: "newgoal", n: "03", label: "Set a goal" },
+  { screen: "breakdown", n: "04", label: "The reality check" },
+  { screen: "rewards", n: "05", label: "Points, and who funds them" },
+  { screen: "settings", n: "06", label: "Settings" },
 ];
 
 export function AppShell() {
@@ -44,10 +53,18 @@ export function AppShell() {
   const [habitLibrary, setHabitLibrary] = useState<HabitLibraryEntry[]>([]);
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [entry, setEntry] = useState<"welcome" | "picker">("welcome");
   const [loginBusy, setLoginBusy] = useState(false);
   const [rewardRules, setRewardRules] = useState<RewardRules | null>(null);
   const [savingsHistory, setSavingsHistory] = useState<SavingsHistoryPoint[] | null>(null);
+  // Every goal on the dashboard needs its own distance, not just the open one.
+  const [goalTimelines, setGoalTimelines] = useState<Record<string, TimelineResult>>({});
+  const [spend, setSpend] = useState<SpendSaveSummary | null>(null);
+  const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
   const [claimBusy, setClaimBusy] = useState<number | null>(null);
+  const [linkBusy, setLinkBusy] = useState(false);
+  const [createBusy, setCreateBusy] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   const [goalName, setGoalName] = useState("");
   const [goalAmountStr, setGoalAmountStr] = useState("");
@@ -55,26 +72,50 @@ export function AppShell() {
 
   const [floaterText, setFloaterText] = useState("");
   const [floaterKey, setFloaterKey] = useState(0);
-  const [celebration, setCelebration] = useState({ open: false, awarded: 0, capped: false, message: "" });
+  const [celebration, setCelebration] = useState({
+    open: false,
+    awarded: 0,
+    capped: false,
+    message: "",
+    weeksEarly: 0,
+  });
 
   const leverTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const nameTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const amountTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const historyTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const applyProfile = useCallback((prof: Profile, hab: HabitEntry[], tl: TimelineResult) => {
-    const goal = prof.goals[0];
-    setPersonaId(prof.userId);
-    setProfile(prof);
-    setHabits(hab);
-    setTimeline(tl);
-    setLever(0);
-    setGoalName(goal.label);
-    setGoalAmountStr(String(Math.round(goal.targetAmount)));
-    setIdealMonths(goal.idealTimeframeMonths);
-    setSavingsHistory(null);
-    api.getSavingsHistory(prof.userId, goal.goalId, 0).then(setSavingsHistory);
+  const loadDashboard = useCallback(async (prof: Profile) => {
+    const [summary, timelines] = await Promise.all([
+      api.getSpendSummary(prof.userId),
+      Promise.all(
+        prof.goals.map((g) =>
+          api.getTimeline(prof.userId, g.goalId, 0).then((tl) => [g.goalId, tl] as const)
+        )
+      ),
+    ]);
+    setSpend(summary);
+    setGoalTimelines(Object.fromEntries(timelines));
   }, []);
+
+  const applyProfile = useCallback(
+    (prof: Profile, hab: HabitEntry[], tl: TimelineResult) => {
+      const goal = prof.goals[0];
+      setPersonaId(prof.userId);
+      setProfile(prof);
+      setHabits(hab);
+      setTimeline(tl);
+      setLever(0);
+      setActiveGoalId(goal.goalId);
+      setGoalName(goal.label);
+      setGoalAmountStr(String(Math.round(goal.targetAmount)));
+      setIdealMonths(goal.idealTimeframeMonths);
+      setSavingsHistory(null);
+      api.getSavingsHistory(prof.userId, goal.goalId, 0).then(setSavingsHistory);
+      loadDashboard(prof);
+    },
+    [loadDashboard]
+  );
 
   useEffect(() => {
     (async () => {
@@ -96,7 +137,11 @@ export function AppShell() {
     async (name: string) => {
       setLoginBusy(true);
       try {
-        const res = await api.login(name);
+        let res = await api.login(name);
+        if (res.profile.userId === "u_maya") {
+          const seeded = await api.seedDemo();
+          if (seeded.added > 0) res = { ...res, profile: await api.getProfile(res.profile.userId) };
+        }
         const goal = res.profile.goals[0];
         const [hab, tl] = await Promise.all([
           api.getHabits(res.profile.userId),
@@ -104,7 +149,7 @@ export function AppShell() {
         ]);
         applyProfile(res.profile, hab, tl);
         if (res.isNew) setAllProfiles((prev) => [res.profile, ...prev]);
-        setScreen("handoff");
+        setScreen("linking");
         setLoggedIn(true);
       } finally {
         setLoginBusy(false);
@@ -125,7 +170,7 @@ export function AppShell() {
         ]);
         applyProfile(res.profile, hab, tl);
         setAllProfiles((prev) => [res.profile, ...prev]);
-        setScreen("handoff");
+        setScreen("linking");
         setLoggedIn(true);
       } finally {
         setLoginBusy(false);
@@ -136,7 +181,8 @@ export function AppShell() {
 
   const handleLogout = useCallback(() => {
     setLoggedIn(false);
-    setScreen("handoff");
+    setEntry("welcome");
+    setScreen("linking");
   }, []);
 
   useEffect(() => {
@@ -157,7 +203,28 @@ export function AppShell() {
     return () => window.removeEventListener("keydown", handler);
   }, [screen, celebration.open, loggedIn]);
 
-  const goal = profile?.goals[0] ?? null;
+  const goal =
+    profile?.goals.find((g) => g.goalId === activeGoalId) ?? profile?.goals[0] ?? null;
+
+  const openGoal = async (goalId: string) => {
+    if (!personaId) return;
+    setActiveGoalId(goalId);
+    setLever(0);
+    const opened = profile?.goals.find((g) => g.goalId === goalId);
+    if (opened) {
+      setGoalName(opened.label);
+      setGoalAmountStr(String(Math.round(opened.targetAmount)));
+      setIdealMonths(opened.idealTimeframeMonths);
+    }
+    const [tl, hist] = await Promise.all([
+      api.getTimeline(personaId, goalId, 0),
+      api.getSavingsHistory(personaId, goalId, 0),
+    ]);
+    setTimeline(tl);
+    setSavingsHistory(hist);
+    setGoalTimelines((prev) => ({ ...prev, [goalId]: tl }));
+    setScreen("breakdown");
+  };
 
   const onLeverChange = (v: number) => {
     setLever(v);
@@ -188,6 +255,7 @@ export function AppShell() {
     );
     setProfile((p) => (p ? { ...p, points: res.points } : p));
     setTimeline(res.timeline);
+    setGoalTimelines((prev) => ({ ...prev, [goal.goalId]: res.timeline }));
     if (res.ticked) {
       setFloaterText("+" + res.habit.points);
       setFloaterKey((k) => k + 1);
@@ -243,6 +311,11 @@ export function AppShell() {
 
   const onCompleteGoal = async () => {
     if (!goal || !personaId) return;
+    const weeksBefore = timeline?.weeks ?? null;
+    const weeksEarly =
+      weeksBefore !== null && timeline && weeksBefore < timeline.idealWeeks
+        ? timeline.idealWeeks - weeksBefore
+        : 0;
     const res = await api.completeGoal(personaId, goal.goalId);
     setProfile((p) => {
       if (!p) return p;
@@ -256,6 +329,7 @@ export function AppShell() {
       awarded: res.capped ? 0 : rewardRules?.goalCompletionPoints ?? 0,
       capped: res.capped,
       message: res.message,
+      weeksEarly,
     });
   };
 
@@ -277,6 +351,52 @@ export function AppShell() {
       }
     } finally {
       setClaimBusy(null);
+    }
+  };
+
+  const onCreateGoal = async (input: GoalCreateInput) => {
+    if (!personaId) return;
+    setCreateBusy(true);
+    try {
+      const created = await api.createGoal(personaId, input);
+      const updated = await api.getProfile(personaId);
+      setProfile(updated);
+      await loadDashboard(updated);
+      await openGoal(created.goalId);
+    } finally {
+      setCreateBusy(false);
+    }
+  };
+
+  // Settings writes to the live profile, so the dashboard greeting and the
+  // linked-account list move with it (design board 13).
+  const onRename = async (name: string) => {
+    if (!personaId) return;
+    const updated = await api.editProfile(personaId, { displayName: name });
+    setProfile(updated);
+    setAllProfiles((prev) => prev.map((p) => (p.userId === updated.userId ? updated : p)));
+  };
+
+  const onToggleNotifications = async (on: boolean) => {
+    if (!personaId) return;
+    setProfile((p) => (p ? { ...p, preferences: { notificationsEnabled: on } } : p));
+    const updated = await api.editProfile(personaId, { notificationsEnabled: on });
+    setProfile(updated);
+  };
+
+  const onLinkBank = async () => {
+    if (!personaId) return;
+    setLinkBusy(true);
+    setLinkError(null);
+    try {
+      const res = await api.linkBank(personaId);
+      setProfile((p) =>
+        p ? { ...p, linkedBankIds: res.linkedBanks.map((b) => b.bankId) } : p
+      );
+    } catch {
+      setLinkError("Every partner bank is already linked.");
+    } finally {
+      setLinkBusy(false);
     }
   };
 
@@ -307,6 +427,12 @@ export function AppShell() {
               <span>Able AI</span>
             </div>
             <div className="viewport">
+              {entry === "welcome" ? (
+                <WelcomeScreen
+                  onGetStarted={() => setEntry("picker")}
+                  onLogIn={() => setEntry("picker")}
+                />
+              ) : (
               <LoginScreen
                 profiles={allProfiles}
                 banks={banks}
@@ -316,6 +442,7 @@ export function AppShell() {
                 onLogin={handleLogin}
                 onSignup={handleSignup}
               />
+              )}
             </div>
           </div>
         </div>
@@ -323,7 +450,6 @@ export function AppShell() {
     );
   }
 
-  const topHabit = habits.find((h) => !h.ticked) ?? habits[0] ?? null;
   const tickedCount = habits.filter((h) => h.ticked).length;
 
   return (
@@ -381,28 +507,81 @@ export function AppShell() {
               {floaterText}
             </div>
 
+            {screen === "linking" && (
+              <BankLinkScreen
+                banks={banks}
+                suggestedBankId={profile.bankId}
+                onContinue={() => setScreen("analysing")}
+              />
+            )}
+            {screen === "analysing" && (
+              <AnalysingScreen
+                profile={profile}
+                bankName={partnerName}
+                onDone={() => setScreen("home")}
+              />
+            )}
             {screen === "handoff" && <HandoffScreen partnerName={partnerName} onStart={() => setScreen("home")} />}
             {screen === "home" && (
               <HomeScreen
                 profile={profile}
-                goal={goal}
-                timeline={timeline}
-                topHabit={topHabit}
-                points={points}
-                onOpenTimeline={() => setScreen("timeline")}
-                onToggleHabit={onToggleHabit}
+                goals={profile.goals}
+                timelines={goalTimelines}
+                spend={spend}
+                onOpenGoal={openGoal}
+                onCreateGoal={() => setScreen("newgoal")}
+                onOpenSettings={() => setScreen("settings")}
               />
+            )}
+            {screen === "editgoal" && (
+              <section className="screen" data-screen="editgoal">
+                <div className="col" style={{ gap: 8 }}>
+                  <span className="eyebrow">Edit target</span>
+                  <h2 className="h-lg">{goal.label}</h2>
+                </div>
+                <Sheet
+                  emoji={goal.emoji}
+                  name={goalName}
+                  amount={goalAmountStr ? Number(goalAmountStr).toLocaleString("en-GB") : ""}
+                  idealMonths={idealMonths}
+                  onNameChange={onNameChange}
+                  onAmountChange={onAmountChange}
+                  onTimeframeChange={onTimeframeChange}
+                />
+                <button
+                  className="btn"
+                  style={{ marginTop: "auto" }}
+                  onClick={async () => {
+                    const tl = await api.getTimeline(profile.userId, goal.goalId, lever);
+                    setTimeline(tl);
+                    setGoalTimelines((prev) => ({ ...prev, [goal.goalId]: tl }));
+                    setProfile(await api.getProfile(profile.userId));
+                    setScreen("breakdown");
+                  }}
+                >
+                  Done
+                </button>
+              </section>
             )}
             {screen === "newgoal" && (
               <NewGoalScreen
-                emoji={goal.emoji}
-                name={goalName}
-                amount={goalAmountStr ? Number(goalAmountStr).toLocaleString("en-GB") : ""}
-                idealMonths={idealMonths}
-                onNameChange={onNameChange}
-                onAmountChange={onAmountChange}
-                onTimeframeChange={onTimeframeChange}
-                onSeeTimeline={() => setScreen("timeline")}
+                profile={profile}
+                busy={createBusy}
+                onCreate={onCreateGoal}
+                onCancel={() => setScreen("home")}
+              />
+            )}
+            {screen === "breakdown" && (
+              <GoalBreakdownScreen
+                goal={goal}
+                timeline={timeline}
+                habits={habits}
+                points={points}
+                onBack={() => setScreen("home")}
+                onToggleHabit={onToggleHabit}
+                onEditTarget={() => setScreen("editgoal")}
+                onComplete={onCompleteGoal}
+                onKeepSaving={() => setScreen("home")}
               />
             )}
             {screen === "timeline" && (
@@ -438,26 +617,42 @@ export function AppShell() {
                 partnerName={partnerName}
                 points={points}
                 tiers={rewardRules.pointsToRewardTiers}
-                goalCompletionPoints={rewardRules.goalCompletionPoints}
+                pointsPerGBP={rewardRules.pointsPerGBP}
                 claimedTierPoints={profile.points.claimedTierPoints}
-                rewardsCreditedGBP={profile.points.rewardsCreditedGBP}
-                accountBalance={profile.accounts[0]?.balance ?? 0}
                 claimBusy={claimBusy}
                 onClaim={onClaimReward}
+              />
+            )}
+            {screen === "settings" && (
+              <SettingsScreen
+                profile={profile}
+                banks={banks}
+                onRename={onRename}
+                onToggleNotifications={onToggleNotifications}
+                onLinkBank={onLinkBank}
+                linkBusy={linkBusy}
+                linkError={linkError}
               />
             )}
           </div>
 
           <CelebrationOverlay
             open={celebration.open}
-            emoji={goal.emoji}
             goalName={goal.label}
+            targetAmount={money(goal.targetAmount)}
             awarded={celebration.awarded}
             capped={celebration.capped}
             message={celebration.message}
-            onNext={() => {
+            weeksEarly={celebration.weeksEarly}
+            partnerName={partnerName}
+            pointsPerGBP={rewardRules.pointsPerGBP}
+            onSeeRewards={() => {
               setCelebration((c) => ({ ...c, open: false }));
-              setScreen("newgoal");
+              setScreen("rewards");
+            }}
+            onBack={() => {
+              setCelebration((c) => ({ ...c, open: false }));
+              setScreen("home");
             }}
           />
 

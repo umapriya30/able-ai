@@ -42,6 +42,8 @@ export type IconName =
   | "goals"
   | "habits"
   | "you"
+  | "settings"
+  | "plus"
   | "coffee"
   | "eating_out"
   | "subs"
@@ -94,6 +96,21 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
       return (
         <Wrap size={size}>
           <polygon points={starPoints(12, 12, 8, 3.4, 5)} />
+        </Wrap>
+      );
+    case "settings":
+      // The dial from design board 04 — a control you turn, not a cog.
+      return (
+        <Wrap size={size}>
+          <circle cx="12" cy="12" r="3.6" />
+          <circle cx="12" cy="12" r="8.6" />
+          <path d="M12 1.2v2.4M12 20.4v2.4M1.2 12h2.4M20.4 12h2.4" />
+        </Wrap>
+      );
+    case "plus":
+      return (
+        <Wrap size={size}>
+          <path d="M12 5v14M5 12h14" />
         </Wrap>
       );
     case "coffee":

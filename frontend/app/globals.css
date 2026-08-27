@@ -308,9 +308,9 @@ p {
   font-size: 12px;
 }
 .card {
-  background: var(--card-2);
-  border: 1px solid var(--line);
+  background: var(--card);
   border-radius: var(--r-card);
+  box-shadow: var(--shadow);
   padding: var(--sp-4);
 }
 .row {
@@ -360,6 +360,10 @@ p {
   font-size: 14px;
   font-weight: 600;
   min-height: 32px;
+  /* A status chip is a pill, not a paragraph — "153w closer" must not wrap
+     into a two-line lozenge next to the hero figure. */
+  white-space: nowrap;
+  flex: none;
 }
 .chip-lime {
   background: var(--lime);
@@ -422,53 +426,142 @@ p {
 .balance .num {
   font-size: 25px;
 }
+.greeting {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+/* 44px minimum target — Jayden is on a cracked phone on a bus. */
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+}
+.icon-btn svg {
+  display: block;
+}
+.balance-fig {
+  font-size: 44px;
+  line-height: 1;
+}
 .split {
   display: flex;
   align-items: center;
   gap: var(--sp-4);
-  padding: 20px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
 }
 .donut {
   flex: none;
+  position: relative;
+  width: 112px;
+  height: 112px;
 }
-.donut text {
-  font-family: var(--display);
-  font-weight: 800;
-  fill: var(--ink);
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
+.donut svg {
+  display: block;
+}
+.donut-centre {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  line-height: 1.3;
 }
 .legend {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
   flex: 1;
 }
-.legend .row {
+.legend-key {
+  display: flex;
+  align-items: center;
   gap: var(--sp-2);
 }
+.legend-fig {
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 700;
+}
 .swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
   flex: none;
 }
 
 .goalcard {
-  background: var(--card-2);
-  border: 1px solid var(--line);
+  background: var(--card);
   border-radius: var(--r-card);
-  padding: var(--sp-4);
+  box-shadow: var(--shadow);
+  padding: 14px var(--sp-4);
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
   width: 100%;
   text-align: left;
 }
-.goalcard:hover {
-  border-color: var(--rail);
+.goalcard:hover .goal-name {
+  color: var(--momentum-ink);
+}
+.goal-emoji {
+  font-size: 20px;
+  line-height: 1;
+  flex: none;
+}
+.goal-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
+  transition: color 0.16s ease;
+}
+.goal-weeks {
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 700;
+}
+/* The rail at goal-card scale: same object as the timeline and the reward
+   bar, one third the size. Track, fill, goalpost tick, marker. */
+.goal-rail {
+  position: relative;
+  height: 16px;
+}
+.goal-rail .track,
+.goal-rail .fill {
+  position: absolute;
+  top: 5px;
+  height: 6px;
+  border-radius: 999px;
+}
+.goal-rail .track {
+  left: 0;
+  right: 0;
+  background: var(--rail);
+}
+.goal-rail .fill {
+  left: 0;
+  transition: width 0.48s cubic-bezier(0.22, 1, 0.36, 1), background 0.24s ease;
+}
+.goal-rail .ideal {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--ink);
+}
+.goal-rail .marker {
+  position: absolute;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 3px solid var(--card);
+  transition: left 0.48s cubic-bezier(0.22, 1, 0.36, 1), background 0.24s ease;
 }
 .goalcard .chip {
   align-self: flex-start;
@@ -502,6 +595,115 @@ p {
 .distances .num-lead {
   font-size: 44px;
   line-height: 1.02;
+}
+
+/* Hero scale of the same rail — board 07. The goalpost gets a square cap so
+   it reads as a post planted in the track, not just a lighter tick. */
+.goal-rail.is-hero {
+  height: 24px;
+}
+.goal-rail.is-hero .track,
+.goal-rail.is-hero .fill {
+  top: 9px;
+}
+.goal-rail.is-hero .marker {
+  width: 22px;
+  height: 22px;
+  top: 1px;
+}
+.goal-rail .ideal-cap {
+  position: absolute;
+  top: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+.icon-btn.is-bare {
+  background: transparent;
+}
+.chev {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.chev[data-open="true"] {
+  transform: rotate(90deg);
+  color: var(--ink);
+}
+.chev.is-back {
+  transform: rotate(180deg);
+  color: var(--ink);
+}
+.rule {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--line);
+}
+.stat-fig {
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+/* Action center — one card per group, rows divided by a hairline (board 07). */
+.habit-block {
+  border-bottom: 1px solid var(--line);
+}
+.habit-block:last-child {
+  border-bottom: 0;
+}
+.habit-open {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  text-align: left;
+  min-height: 56px;
+}
+.habit-why {
+  /* The working sits on the card, not on the row's ticked tint — the tiles
+     inside it need their own contrast to stay readable either way. */
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: 0 14px 16px 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.why-body {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 40ch;
+}
+.why-tiles {
+  display: flex;
+  gap: var(--sp-2);
+}
+.tile {
+  flex: 1;
+  border-radius: var(--r-ctl);
+  padding: 12px;
+  background: var(--card-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tile.is-momentum {
+  background: var(--momentum-soft);
+}
+.tile.is-momentum .eyebrow,
+.tile.is-momentum .tile-fig {
+  color: var(--momentum-ink);
+}
+.tile-fig {
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 700;
 }
 
 /* ---------- timeline rail ---------- */
@@ -597,51 +799,47 @@ p {
 .habits {
   display: flex;
   flex-direction: column;
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
 .habit {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
   min-height: 56px;
-  padding: 14px 0;
+  padding: 8px 14px;
   width: 100%;
   background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
   text-align: left;
-  transition: background 0.18s ease, padding 0.18s ease;
+  transition: background 0.24s ease;
 }
-.habit:last-child {
-  border-bottom: none;
-}
-.habit:hover .habit-label {
-  color: var(--ink);
-}
-.habit[data-done="true"] {
+.habit-block[data-done="true"] {
   background: var(--momentum-soft);
-  border-bottom-color: transparent;
-  border-radius: 14px;
-  padding: 14px 12px;
-  margin: 0 -12px;
 }
-.habit[data-done="true"] .habit-label {
+.habit-block:hover .habit-label {
   color: var(--momentum-ink);
 }
-.habit[data-done="true"] .habit-meta {
+.habit-block[data-done="true"] .habit-label {
+  color: var(--momentum-ink);
+  text-decoration: line-through;
+}
+.habit-block[data-done="true"] .habit-meta,
+.habit-block[data-done="true"] .chev {
   color: var(--momentum-ink);
 }
 .box {
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-  border: 2px solid var(--rail);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1.5px solid var(--muted);
   flex: none;
   display: grid;
   place-items: center;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
-.habit[data-done="true"] .box {
+.habit-block[data-done="true"] .box {
   background: var(--momentum);
   border-color: var(--momentum);
 }
@@ -655,13 +853,14 @@ p {
   stroke-dashoffset: 20;
   transition: stroke-dashoffset 0.22s ease 0.06s;
 }
-.habit[data-done="true"] .box svg {
+.habit-block[data-done="true"] .box svg {
   stroke-dashoffset: 0;
 }
 .habit-label {
-  font-weight: 600;
+  font-weight: 500;
   font-size: 16px;
-  line-height: 1.3;
+  line-height: 1.2;
+  transition: color 0.18s ease;
 }
 .habit-meta {
   font-family: var(--mono);
@@ -697,7 +896,7 @@ p {
   border: 1px solid var(--line);
   color: var(--muted);
 }
-.habit[data-done="true"] .hicon {
+.habit-block[data-done="true"] .hicon {
   background: var(--card);
   border-color: transparent;
   color: var(--momentum-ink);
@@ -822,20 +1021,293 @@ input[type="range"]::-moz-range-thumb {
   flex-direction: column;
   gap: 0;
 }
+/* A row inside a list card (boards 12 and 13): 56px minimum, hairline
+   between rows, never below the last one. */
 .tier {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: var(--sp-3) 0;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding: 10px var(--sp-4);
   border-bottom: 1px solid var(--line);
   font-size: 16px;
+  width: 100%;
+  text-align: left;
 }
 .tier:last-child {
   border-bottom: none;
+}
+.tier.is-action:disabled {
+  opacity: 0.5;
 }
 .tier .t-pts {
   font-family: var(--mono);
   font-size: 14px;
   color: var(--muted);
+}
+.tier-pts {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
+}
+.tier-amount {
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 700;
+}
+.row-title {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+/* ---------- onboarding ---------- */
+.wordmark {
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.hero-line {
+  margin: 0;
+  font-size: 44px;
+  line-height: 1.02;
+  font-weight: 800;
+  text-wrap: balance;
+}
+.bank-option {
+  min-height: 56px;
+  text-align: left;
+  transition: outline-color 0.16s ease;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.bank-option[data-selected="true"] {
+  outline-color: var(--ink);
+}
+.bank-code.is-lg {
+  width: 44px;
+  height: 44px;
+  font-size: 16px;
+  background: var(--ink);
+  color: var(--ground);
+}
+.scope-tick {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--momentum-soft);
+  color: var(--momentum-ink);
+}
+/* A step still running is an outline that breathes — the state underneath it
+   is the tick that has not arrived yet, so nothing is animation-only. */
+.scope-tick[data-pending="true"] {
+  background: transparent;
+  border: 1.5px solid var(--muted);
+  animation: ablePulse 1.4s ease-in-out infinite;
+}
+@keyframes ablePulse {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.scope-name {
+  font-family: var(--mono);
+  font-size: 14px;
+}
+.analyse-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rail);
+  overflow: hidden;
+}
+.analyse-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--momentum);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .scope-tick[data-pending="true"] {
+    animation: none;
+  }
+}
+
+/* ---------- create goal ---------- */
+.goal-input {
+  /* min-width:0 — an input in a flex row otherwise blocks shrink and
+     silently overflows the 390px phone (CLAUDE.md). */
+  min-width: 0;
+  width: 100%;
+  font: 600 25px/1.1 var(--display);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--ink);
+  padding: 6px 0;
+  caret-color: var(--momentum);
+}
+.goal-input:focus {
+  outline: none;
+}
+.chips {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.emoji-pick {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--card-2);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  transition: background 0.16s ease;
+}
+.emoji-pick[data-selected="true"] {
+  background: var(--ink);
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.months-fig {
+  font-size: 56px;
+  line-height: 0.9;
+}
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  background: transparent;
+}
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rail);
+}
+.slider::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rail);
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -11px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow);
+}
+.slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+}
+.row.eyebrow.tnum > span {
+  flex: 1;
+  text-align: center;
+}
+.row.eyebrow.tnum > span:first-child {
+  text-align: left;
+}
+.row.eyebrow.tnum > span:last-child {
+  text-align: right;
+}
+
+/* ---------- settings ---------- */
+.avatar {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--ground);
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 20px;
+}
+.bank-code {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: var(--r-ctl);
+  background: var(--card-2);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 12px;
+}
+.bank-code.is-dashed {
+  background: transparent;
+  border: 1.5px dashed var(--muted);
+}
+.name-input {
+  flex: 1;
+  /* An input in a flex row carries an intrinsic width that blocks shrink and
+     silently overflows the 390px phone (CLAUDE.md). */
+  min-width: 0;
+  font: 600 16px/1.2 var(--ui);
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--ink);
+  padding: 6px 0;
+}
+.name-input:focus {
+  outline: none;
+}
+.btn.is-inline {
+  width: auto;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  flex: none;
+  font-size: 14px;
+}
+.toggle {
+  width: 52px;
+  height: 32px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--rail);
+  position: relative;
+  transition: background 0.2s ease;
+}
+.toggle[data-on="true"] {
+  background: var(--momentum);
+}
+.toggle .knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--card);
+  transition: left 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.toggle[data-on="true"] .knob {
+  left: 23px;
 }
 
 /* ---------- tabs ---------- */
@@ -872,6 +1344,62 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ---------- celebration ---------- */
+.cel-line {
+  position: relative;
+  color: var(--muted);
+}
+/* Scoped to .celebrate so it outranks `.celebrate .num`, which paints every
+   figure on the overlay lime. Lime belongs to the points figure alone; the
+   headline is plain celebration copy. */
+.celebrate .num.cel-head {
+  position: relative;
+  margin: 0;
+  color: var(--cel-fg);
+  font-size: 31px;
+  line-height: 1.04;
+  white-space: pre-line;
+  text-wrap: balance;
+}
+.cel-points {
+  position: relative;
+  font-size: 44px;
+  line-height: 1;
+}
+.cel-body {
+  position: relative;
+  margin: 0;
+  color: var(--muted);
+  max-width: 32ch;
+}
+/* Capped is a fact, not a telling-off: amber rule, left aligned, no red. */
+.cel-capped {
+  position: relative;
+  margin: 0;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--slip-on-ink);
+  border-left: 2px solid var(--slip-on-ink);
+  padding-left: var(--sp-3);
+  max-width: 34ch;
+}
+.cel-actions {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-top: var(--sp-3);
+}
+.btn-lime {
+  background: var(--lime);
+  color: var(--on-lime);
+}
+.btn-onink {
+  background: transparent;
+  border: 1.5px solid var(--cel-fg);
+  color: var(--cel-fg);
+}
 .celebrate {
   position: absolute;
   inset: 0;
@@ -885,6 +1413,9 @@ input[type="range"]::-moz-range-thumb {
   padding: var(--sp-8);
   text-align: center;
   z-index: 5;
+}
+.celebrate {
+  overflow-y: auto;
 }
 .celebrate[data-open="true"] {
   display: flex;
@@ -915,7 +1446,7 @@ input[type="range"]::-moz-range-thumb {
   background: radial-gradient(circle, rgba(200, 241, 53, 0.28), transparent 68%);
 }
 .celebrate .num {
-  font-size: 56px;
+  font-size: 44px;
   color: var(--lime);
 }
 .celebrate .btn {

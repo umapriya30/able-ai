@@ -4,8 +4,40 @@
     {
       "name": "proto",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["-y", "serve", "prototype", "-l", "4321", "--no-clipboard"],
+      "runtimeArgs": [
+        "-y",
+        "serve",
+        "prototype",
+        "-l",
+        "4321",
+        "--no-clipboard"
+      ],
       "port": 4321
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "backend/.venv/bin/python",
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "main:app",
+        "--port",
+        "8000",
+        "--app-dir",
+        "backend"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "frontend",
+        "run",
+        "dev"
+      ],
+      "port": 3000
     }
   ]
 }

@@ -22,6 +22,7 @@ import type {
   SpendSaveSummary,
   TimelineResult,
   WeeklyPlan,
+  WeeklyPlanAICheckResponse,
   WeeklyPlanToggleResponse,
 } from "./types";
 
@@ -193,4 +194,9 @@ export const api = {
       `${BASE}/profiles/${profileId}/goals/${goalId}/weekly-plan/weeks/${weekNumber}/habits/${habitId}/toggle`,
       { method: "POST" }
     ).then((r) => json<WeeklyPlanToggleResponse>(r)),
+
+  aiCheckWeek: (profileId: string, goalId: string, weekNumber: number) =>
+    fetch(`${BASE}/profiles/${profileId}/goals/${goalId}/weekly-plan/weeks/${weekNumber}/ai-check`, {
+      method: "POST",
+    }).then((r) => json<WeeklyPlanAICheckResponse>(r)),
 };

@@ -1,8 +1,7 @@
 "use client";
 
 import type { WeeklyPlan } from "@/lib/types";
-import { PrimaryButton } from "../Buttons";
-import { Chip } from "../Chip";
+import { PrimaryButton, GhostButton } from "../Buttons";
 import { HabitRow } from "../HabitRow";
 import { PointsCounter } from "../PointsCounter";
 
@@ -17,27 +16,36 @@ export function WeeklyPlanScreen({
   goalName,
   goalEmoji,
   points,
+  goalWeeksRemaining,
   plan,
   loading,
   selectedWeek,
   onSelectWeek,
   onToggleWeekHabit,
+  aiCheckBusy,
+  aiCheckNarration,
+  onAICheck,
   onBack,
   onContinue,
 }: {
   goalName: string;
   goalEmoji: string;
   points: number;
+  goalWeeksRemaining: number | null;
   plan: WeeklyPlan | null;
   loading: boolean;
   selectedWeek: number;
   onSelectWeek: (week: number) => void;
   onToggleWeekHabit: (weekNumber: number, habitId: string) => void;
+  aiCheckBusy: boolean;
+  aiCheckNarration: string | null;
+  onAICheck: () => void;
   onBack: () => void;
   onContinue: () => void;
 }) {
   const week = plan?.weeks.find((w) => w.weekNumber === selectedWeek) ?? null;
   const doneCount = week ? week.habits.filter((h) => h.ticked).length : 0;
+  const allDone = week ? doneCount === week.habits.length && week.habits.length > 0 : false;
 
   return (
     <section className="screen" data-screen="weekly-plan">
@@ -63,6 +71,12 @@ export function WeeklyPlanScreen({
         <h3 className="h-lg" style={{ margin: 0 }}>
           Track it week by week
         </h3>
+        {plan && (
+          <p className="small muted" aria-live="polite">
+            You&apos;re looking at week {selectedWeek} of {plan.totalWeeks}
+            {goalWeeksRemaining !== null ? ` · ${goalWeeksRemaining} weeks away from ${goalName}` : ""}.
+          </p>
+        )}
       </div>
 
       {!plan && loading && (
@@ -73,19 +87,22 @@ export function WeeklyPlanScreen({
 
       {plan && (
         <>
-          <div className="col" style={{ gap: 8 }}>
-            <span className="eyebrow">Select week</span>
-            <div className="chips" role="tablist" aria-label="Select week">
+          <div className="col" style={{ gap: 4 }}>
+            <label className="eyebrow" htmlFor="week-filter">
+              Filter by week
+            </label>
+            <select
+              id="week-filter"
+              className="week-filter"
+              value={selectedWeek}
+              onChange={(e) => onSelectWeek(Number(e.target.value))}
+            >
               {plan.weeks.map((w) => (
-                <Chip
-                  key={w.weekNumber}
-                  variant={w.weekNumber === selectedWeek ? "sel" : "default"}
-                  onClick={() => onSelectWeek(w.weekNumber)}
-                >
-                  Week {w.weekNumber}
-                </Chip>
+                <option key={w.weekNumber} value={w.weekNumber}>
+                  Week {w.weekNumber} — {w.habits.filter((h) => h.ticked).length}/{w.habits.length} done
+                </option>
               ))}
-            </div>
+            </select>
           </div>
 
           {week && (
@@ -98,18 +115,35 @@ export function WeeklyPlanScreen({
               </div>
               <div className="habits">
                 {week.habits.map((h) => (
-                  <HabitRow
-                    key={h.habit.habitId}
-                    habit={h.habit}
-                    ticked={h.ticked}
-                    explanation={h.explanation}
-                    onToggle={() => onToggleWeekHabit(week.weekNumber, h.habit.habitId)}
-                  />
+                  <div key={h.habit.habitId} className="col" style={{ gap: 4 }}>
+                    <HabitRow
+                      habit={h.habit}
+                      ticked={h.ticked}
+                      explanation={h.explanation}
+                      onToggle={() => onToggleWeekHabit(week.weekNumber, h.habit.habitId)}
+                    />
+                    <p className={`tiny ${h.ticked ? "muted" : ""}`} style={{ padding: "0 14px", color: h.ticked ? undefined : "var(--slip-ink)" }}>
+                      {h.ticked ? `Done in week ${week.weekNumber}.` : `You haven't done this in week ${week.weekNumber} yet.`}
+                    </p>
+                  </div>
                 ))}
                 {week.habits.length === 0 && (
                   <p className="small muted">No habits in this plan yet.</p>
                 )}
               </div>
+
+              {week.habits.length > 0 && !allDone && (
+                <div className="card col" style={{ gap: 8 }}>
+                  <span className="eyebrow">Let AI check your spending</span>
+                  <p className="small muted">
+                    AI reviews your spending this week and checks off what looks on track.
+                  </p>
+                  {aiCheckNarration && <p className="small">{aiCheckNarration}</p>}
+                  <GhostButton onClick={onAICheck}>
+                    {aiCheckBusy ? "Checking…" : "Let AI check this week"}
+                  </GhostButton>
+                </div>
+              )}
             </>
           )}
         </>

@@ -1,10 +1,12 @@
 from fastapi import APIRouter, HTTPException
 
 import store
+from ai_habits import narrate_ai_check
 from logic import explain_habit
 from models import (
     HabitEntry,
     WeeklyPlan,
+    WeeklyPlanAICheckResponse,
     WeeklyPlanCreateInput,
     WeeklyPlanToggleResponse,
     WeeklyPlanWeek,
@@ -101,3 +103,40 @@ def toggle_week_habit(profile_id: str, goal_id: str, week_number: int, habit_id:
         points.lifetime += habit.points
 
     return WeeklyPlanToggleResponse(plan=_build_plan(profile, goal, state), points=points)
+
+
+@router.post(
+    "/profiles/{profile_id}/goals/{goal_id}/weekly-plan/weeks/{week_number}/ai-check",
+    response_model=WeeklyPlanAICheckResponse,
+)
+def ai_check_week(profile_id: str, goal_id: str, week_number: int) -> WeeklyPlanAICheckResponse:
+    """Marks every not-yet-done habit in this week complete and awards their
+    points, narrating why from the profile's real spending (see
+    narrate_ai_check). There's no per-transaction feed to selectively detect
+    which specific habits happened this week (docs/01-user-journey.md scopes
+    that out) — this represents "AI reviewed your week", not a per-habit
+    fraud check."""
+    profile = _profile_or_404(profile_id)
+    goal = _goal_or_404(profile, goal_id)
+    state = store.WEEKLY_PLANS.get(_plan_key(profile_id, goal_id))
+    if state is None:
+        raise HTTPException(status_code=404, detail="No weekly plan for this goal yet")
+    if not (1 <= week_number <= state.total_weeks):
+        raise HTTPException(status_code=422, detail=f"week_number must be between 1 and {state.total_weeks}")
+
+    completed = state.completions.setdefault(week_number, set())
+    points = store.POINTS[profile_id]
+    newly_completed = []
+    for habit_id in state.habit_ids:
+        if habit_id in completed:
+            continue
+        habit = store.resolve_habit(profile, goal, habit_id)
+        if habit is None:
+            continue
+        completed.add(habit_id)
+        points.balance += habit.points
+        points.lifetime += habit.points
+        newly_completed.append(habit)
+
+    narration = narrate_ai_check(profile, goal, newly_completed)
+    return WeeklyPlanAICheckResponse(plan=_build_plan(profile, goal, state), points=points, narration=narration)

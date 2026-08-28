@@ -990,6 +990,16 @@ p {
 .box-square {
   border-radius: 10px;
 }
+.week-filter {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font: 600 15px var(--ui);
+  width: 100%;
+}
 .box svg {
   stroke: var(--card);
   stroke-width: 3;

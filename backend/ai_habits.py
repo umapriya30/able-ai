@@ -330,6 +330,52 @@ def _chat_about_habits_groq(
     return reply, picked
 
 
+def narrate_ai_check(profile: Profile, goal: Goal, completed_habits: list[HabitLibraryEntry]) -> str:
+    """The weekly plan's "let AI check this week" action. There is no
+    per-transaction feed to detect what actually happened this week (see
+    docs/01-user-journey.md — deliberately out of scope), so this reviews
+    the same real category-spend figures explain_habit() already reads and
+    reports back on the habits it just marked complete for this week. Never
+    invents a number; only ever narrates habits the caller already decided
+    to mark done."""
+    if not completed_habits:
+        return "Nothing new to check off this week — you're already on track."
+
+    if settings.ai_narration_enabled:
+        try:
+            return narrate_ai_check_groq(profile, goal, completed_habits)
+        except Exception:
+            pass  # network/key trouble shouldn't break the demo
+
+    labels = ", ".join(h.label.rstrip(".").lower() for h in completed_habits)
+    return f"Reviewed your spending this week — {labels} looks on track, marked as done."
+
+
+def narrate_ai_check_groq(profile: Profile, goal: Goal, completed_habits: list[HabitLibraryEntry]) -> str:
+    from groq import Groq  # lazy import: only needed when narration is enabled
+
+    client = Groq()
+    habit_lines = "\n".join(f"- {h.label}" for h in completed_habits)
+    prompt = (
+        f"You just reviewed {profile.displayName}'s spending this week for their '{goal.label}' "
+        f"goal and confirmed these habits look on track, so they've been marked complete:\n\n"
+        f"{habit_lines}\n\n"
+        f"Write ONE short, warm sentence (max 25 words) reporting this back, as if you just "
+        f"finished checking their spending. Never say 'you should' or give financial advice. "
+        f"Never invent a number that isn't listed. Plain text only — no emoji."
+    )
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        max_tokens=250,
+        reasoning_effort="low",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    content = response.choices[0].message.content
+    if not content:
+        raise RuntimeError("Groq returned no check-in content")
+    return content
+
+
 def _parse_chat_reply(content: str) -> tuple[str, list[str]]:
     reply = ""
     habit_ids: list[str] = []

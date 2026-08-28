@@ -159,6 +159,12 @@ export interface WeeklyPlanToggleResponse {
   points: Points;
 }
 
+export interface WeeklyPlanAICheckResponse {
+  plan: WeeklyPlan;
+  points: Points;
+  narration: string;
+}
+
 export interface AIChatResponse {
   reply: string;
   suggestions: AIHabitSuggestion[];

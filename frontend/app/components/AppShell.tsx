@@ -85,6 +85,8 @@ export function AppShell() {
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan | null>(null);
   const [weeklyPlanLoading, setWeeklyPlanLoading] = useState(false);
   const [weeklyPlanWeek, setWeeklyPlanWeek] = useState(1);
+  const [aiCheckBusy, setAiCheckBusy] = useState(false);
+  const [aiCheckNarration, setAiCheckNarration] = useState<string | null>(null);
 
   const [goalName, setGoalName] = useState("");
   const [goalAmountStr, setGoalAmountStr] = useState("");
@@ -329,6 +331,7 @@ export function AppShell() {
 
     setWeeklyPlan(null);
     setWeeklyPlanWeek(1);
+    setAiCheckNarration(null);
     setScreen("weekly-plan");
     setWeeklyPlanLoading(true);
     try {
@@ -352,6 +355,24 @@ export function AppShell() {
     const res = await api.toggleWeeklyPlanHabit(personaId, goal.goalId, weekNumber, habitId);
     setWeeklyPlan(res.plan);
     setProfile((p) => (p ? { ...p, points: res.points } : p));
+  };
+
+  const onSelectWeeklyPlanWeek = (week: number) => {
+    setWeeklyPlanWeek(week);
+    setAiCheckNarration(null);
+  };
+
+  const onAICheckWeek = async () => {
+    if (!personaId || !goal) return;
+    setAiCheckBusy(true);
+    try {
+      const res = await api.aiCheckWeek(personaId, goal.goalId, weeklyPlanWeek);
+      setWeeklyPlan(res.plan);
+      setProfile((p) => (p ? { ...p, points: res.points } : p));
+      setAiCheckNarration(res.narration);
+    } finally {
+      setAiCheckBusy(false);
+    }
   };
 
   const onLeverChange = (v: number) => {
@@ -721,11 +742,15 @@ export function AppShell() {
                 goalName={goal.label}
                 goalEmoji={goal.emoji}
                 points={points}
+                goalWeeksRemaining={timeline.weeks}
                 plan={weeklyPlan}
                 loading={weeklyPlanLoading}
                 selectedWeek={weeklyPlanWeek}
-                onSelectWeek={setWeeklyPlanWeek}
+                onSelectWeek={onSelectWeeklyPlanWeek}
                 onToggleWeekHabit={onToggleWeekHabit}
+                aiCheckBusy={aiCheckBusy}
+                aiCheckNarration={aiCheckNarration}
+                onAICheck={onAICheckWeek}
                 onBack={() => setScreen("ai-recommend")}
                 onContinue={() => setScreen("breakdown")}
               />

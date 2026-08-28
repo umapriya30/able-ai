@@ -233,6 +233,12 @@ class WeeklyPlanToggleResponse(BaseModel):
     points: Points
 
 
+class WeeklyPlanAICheckResponse(BaseModel):
+    plan: WeeklyPlan
+    points: Points
+    narration: str
+
+
 class AIChatResponse(BaseModel):
     reply: str
     suggestions: list[AIHabitSuggestion]

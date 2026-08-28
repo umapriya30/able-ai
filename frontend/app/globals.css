@@ -960,6 +960,13 @@ p {
   color: var(--momentum-ink);
   text-decoration: line-through;
 }
+/* AI recommendation screen: picking a habit is a selection, not a completed
+   task — the green fill still shows it's picked, but no strikethrough.
+   Strikethrough is reserved for the weekly plan, where a habit is actually
+   completed for that week. */
+.habit-block.is-select[data-done="true"] .habit-label {
+  text-decoration: none;
+}
 .habit-block[data-done="true"] .habit-meta,
 .habit-block[data-done="true"] .chev {
   color: var(--momentum-ink);
@@ -977,6 +984,21 @@ p {
 .habit-block[data-done="true"] .box {
   background: var(--momentum);
   border-color: var(--momentum);
+}
+/* AI recommendation screen: a literal checkbox for "selected", distinct
+   from the round commit checkmark used everywhere else in the app. */
+.box-square {
+  border-radius: 10px;
+}
+.week-filter {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font: 600 15px var(--ui);
+  width: 100%;
 }
 .box svg {
   stroke: var(--card);

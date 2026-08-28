@@ -15,6 +15,7 @@ export function TabBar({ current, onGo }: { current: ScreenName; onGo: (s: Scree
     current === "whatif" ||
     current === "timeline" ||
     current === "ai-recommend" ||
+    current === "weekly-plan" ||
     current === "habits"
       ? "breakdown"
       : current;

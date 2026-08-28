@@ -8,6 +8,7 @@ export type ScreenName =
   | "timeline"
   | "whatif"
   | "ai-recommend"
+  | "weekly-plan"
   | "habits"
   | "rewards"
   | "editgoal"

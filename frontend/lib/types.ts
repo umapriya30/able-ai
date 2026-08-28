@@ -143,6 +143,28 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface WeeklyPlanWeek {
+  weekNumber: number;
+  habits: HabitEntry[];
+}
+
+export interface WeeklyPlan {
+  goalId: string;
+  totalWeeks: number;
+  weeks: WeeklyPlanWeek[];
+}
+
+export interface WeeklyPlanToggleResponse {
+  plan: WeeklyPlan;
+  points: Points;
+}
+
+export interface WeeklyPlanAICheckResponse {
+  plan: WeeklyPlan;
+  points: Points;
+  narration: string;
+}
+
 export interface AIChatResponse {
   reply: string;
   suggestions: AIHabitSuggestion[];

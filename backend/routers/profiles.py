@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 
 import store
+from ai_habits import curated_habits_for_profile
 from logic import (
     award_goal_completion,
     compute_savings_history,
@@ -126,7 +127,7 @@ def signup(payload: SignupRequest) -> LoginResponse:
     if payload.initialHabitIds or payload.customHabits:
         ticked = store.TICKED_HABITS[new_profile.userId]
         points = store.POINTS[new_profile.userId]
-        curated = {h.habitId: h for h in store.PAYLOAD.habitLibrary if new_profile.persona in h.personas}
+        curated = {h.habitId: h for h in curated_habits_for_profile(store.PAYLOAD, new_profile)}
         for habit_id in payload.initialHabitIds:
             habit = curated.get(habit_id)
             if habit and habit_id not in ticked:
@@ -375,7 +376,7 @@ def get_habits(profile_id: str, goal_id: str | None = None) -> list[HabitEntry]:
     dropdown shows, computed from this profile's own spending."""
     profile = _profile_or_404(profile_id)
     ticked = store.TICKED_HABITS.get(profile_id, set())
-    curated = [h for h in store.PAYLOAD.habitLibrary if profile.persona in h.personas]
+    curated = curated_habits_for_profile(store.PAYLOAD, profile)
     custom = store.CUSTOM_HABITS.get(profile_id, [])
     habits = [*curated, *custom]
     habits.sort(key=lambda h: h.kind == "productive")  # stable: preserves library order within each kind
@@ -394,21 +395,9 @@ def toggle_habit(profile_id: str, habit_id: str, goal_id: str, lever: float = 0.
     profile = _profile_or_404(profile_id)
     goal = _goal_or_404(profile, goal_id)
 
-    habit = next((h for h in store.PAYLOAD.habitLibrary if h.habitId == habit_id), None)
+    habit = store.resolve_habit(profile, goal, habit_id)
     if habit is None:
-        habit = next((h for h in store.CUSTOM_HABITS.get(profile_id, []) if h.habitId == habit_id), None)
-    if habit is None:
-        # not curated, not user-authored — must be an AI-generated suggestion
-        from ai_habits import generate_ai_habits
-
-        label, target, ideal = store.effective_goal_fields(goal)
-        ai_suggestions = generate_ai_habits(
-            store.PAYLOAD, profile, goal, target, ideal, ticked_habit_ids=set(), max_habits=10
-        )
-        match = next((s for s in ai_suggestions if s.habit.habitId == habit_id), None)
-        if match is None:
-            raise HTTPException(status_code=404, detail="Habit not found")
-        habit = match.habit
+        raise HTTPException(status_code=404, detail="Habit not found")
 
     ticked_set = store.TICKED_HABITS.setdefault(profile_id, set())
     points = store.POINTS[profile_id]
@@ -431,6 +420,36 @@ def toggle_habit(profile_id: str, habit_id: str, goal_id: str, lever: float = 0.
         ticked=now_ticked,
         explanation=explain_habit(profile, habit),
         points=points,
+        timeline=timeline,
+    )
+
+
+@router.post("/profiles/{profile_id}/habits/{habit_id}/commit", response_model=HabitToggleResponse)
+def commit_habit(profile_id: str, habit_id: str, goal_id: str, lever: float = 0.0) -> HabitToggleResponse:
+    """Adds a habit to the plan (counts toward the timeline, same as
+    toggle_habit) WITHOUT awarding points. Used when committing habits
+    chosen on the AI recommendation screen: selecting there is a plan, not
+    an achievement — points are only earned by actually completing a habit
+    in a given week (see routers/weekly_plan.py). Idempotent: committing an
+    already-active habit is a no-op, never removes it."""
+    profile = _profile_or_404(profile_id)
+    goal = _goal_or_404(profile, goal_id)
+
+    habit = store.resolve_habit(profile, goal, habit_id)
+    if habit is None:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    store.TICKED_HABITS.setdefault(profile_id, set()).add(habit_id)
+
+    label, target, ideal = store.effective_goal_fields(goal)
+    ticked_total = _ticked_weekly_total(profile_id, profile)
+    timeline = compute_timeline(profile, goal, target, ideal, ticked_total, lever, saved_override=store.effective_saved(goal))
+
+    return HabitToggleResponse(
+        habit=habit,
+        ticked=True,
+        explanation=explain_habit(profile, habit),
+        points=store.POINTS[profile_id],
         timeline=timeline,
     )
 

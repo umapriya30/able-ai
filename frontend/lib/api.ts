@@ -21,6 +21,9 @@ import type {
   SignupInput,
   SpendSaveSummary,
   TimelineResult,
+  WeeklyPlan,
+  WeeklyPlanAICheckResponse,
+  WeeklyPlanToggleResponse,
 } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -85,6 +88,15 @@ export const api = {
   toggleHabit: (profileId: string, habitId: string, goalId: string, lever: number) =>
     fetch(
       `${BASE}/profiles/${profileId}/habits/${habitId}/toggle?goal_id=${goalId}&lever=${lever}`,
+      { method: "POST" }
+    ).then((r) => json<HabitToggleResponse>(r)),
+
+  // Adds a habit to the plan (counts toward the timeline) without awarding
+  // points — used when committing AI-recommend selections, where points are
+  // only earned by completing a habit in a given week (see weekly plan).
+  commitHabit: (profileId: string, habitId: string, goalId: string, lever: number) =>
+    fetch(
+      `${BASE}/profiles/${profileId}/habits/${habitId}/commit?goal_id=${goalId}&lever=${lever}`,
       { method: "POST" }
     ).then((r) => json<HabitToggleResponse>(r)),
 
@@ -164,4 +176,27 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tierPoints }),
     }).then((r) => json<ClaimRewardResponse>(r)),
+
+  getWeeklyPlan: (profileId: string, goalId: string) =>
+    fetch(`${BASE}/profiles/${profileId}/goals/${goalId}/weekly-plan`).then((r) =>
+      json<WeeklyPlan | null>(r)
+    ),
+
+  createWeeklyPlan: (profileId: string, goalId: string, totalWeeks: number, habitIds: string[]) =>
+    fetch(`${BASE}/profiles/${profileId}/goals/${goalId}/weekly-plan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ totalWeeks, habitIds }),
+    }).then((r) => json<WeeklyPlan>(r)),
+
+  toggleWeeklyPlanHabit: (profileId: string, goalId: string, weekNumber: number, habitId: string) =>
+    fetch(
+      `${BASE}/profiles/${profileId}/goals/${goalId}/weekly-plan/weeks/${weekNumber}/habits/${habitId}/toggle`,
+      { method: "POST" }
+    ).then((r) => json<WeeklyPlanToggleResponse>(r)),
+
+  aiCheckWeek: (profileId: string, goalId: string, weekNumber: number) =>
+    fetch(`${BASE}/profiles/${profileId}/goals/${goalId}/weekly-plan/weeks/${weekNumber}/ai-check`, {
+      method: "POST",
+    }).then((r) => json<WeeklyPlanAICheckResponse>(r)),
 };

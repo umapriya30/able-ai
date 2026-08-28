@@ -17,6 +17,7 @@ export function HabitRow({
   expanded = false,
   onToggle,
   onExpand,
+  variant = "commit",
 }: {
   habit: HabitLibraryEntry;
   ticked: boolean;
@@ -24,17 +25,29 @@ export function HabitRow({
   expanded?: boolean;
   onToggle: () => void;
   onExpand?: () => void;
+  // "commit" (default): this week's Action Center — a checkmark means the
+  // habit is active right now, same meaning everywhere else in the app.
+  // "select": the AI recommendation screen, before anything is committed —
+  // ticking here means "start tracking this", not "done", so it gets its
+  // own icon/copy instead of reading as a completed checkbox.
+  variant?: "commit" | "select";
 }) {
   const monthly = habit.weeklySaving * WEEKS_PER_MONTH;
+  const isSelect = variant === "select";
 
   return (
-    <div className="habit-block" data-done={ticked ? "true" : "false"}>
+    <div className={`habit-block${isSelect ? " is-select" : ""}`} data-done={ticked ? "true" : "false"}>
       <div className="habit">
         <button
-          className="box"
-          role="checkbox"
-          aria-checked={ticked}
-          aria-label={(ticked ? "Untick" : "Tick") + " " + habit.label}
+          className={isSelect ? "box box-square" : "box"}
+          role={isSelect ? "button" : "checkbox"}
+          aria-checked={isSelect ? undefined : ticked}
+          aria-pressed={isSelect ? ticked : undefined}
+          aria-label={
+            isSelect
+              ? (ticked ? "Stop tracking " : "Track ") + habit.label
+              : (ticked ? "Untick" : "Tick") + " " + habit.label
+          }
           onClick={onToggle}
         >
           <svg width={20} height={20} viewBox="0 0 24 24" aria-hidden="true">
@@ -51,7 +64,7 @@ export function HabitRow({
           <span className="col" style={{ gap: 3, flex: 1 }}>
             <span className="habit-label">{habit.label}</span>
             <span className="habit-meta eyebrow tnum">
-              +{money2(habit.weeklySaving)}/wk · {habit.points} pts
+              +{money2(habit.weeklySaving)}/wk{isSelect ? "" : ` · ${habit.points} pts`}
             </span>
           </span>
           {onExpand && (
@@ -79,7 +92,13 @@ export function HabitRow({
             </div>
           </div>
           <button className="btn btn-ghost" onClick={onToggle}>
-            {ticked ? "Remove from this week" : "Add to this week"}
+            {isSelect
+              ? ticked
+                ? "Stop tracking this habit"
+                : "Track this habit"
+              : ticked
+              ? "Remove from this week"
+              : "Add to this week"}
           </button>
         </div>
       )}

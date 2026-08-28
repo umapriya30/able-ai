@@ -16,6 +16,7 @@ import type {
   SignupInput,
   SpendSaveSummary,
   TimelineResult,
+  WeeklyPlan,
 } from "@/lib/types";
 import { SCREENS, type ScreenName } from "@/lib/screens";
 import { CelebrationOverlay } from "./CelebrationOverlay";
@@ -34,6 +35,7 @@ import { WelcomeScreen } from "./screens/WelcomeScreen";
 import { BankLinkScreen } from "./screens/BankLinkScreen";
 import { AnalysingScreen } from "./screens/AnalysingScreen";
 import { AIRecommendScreen } from "./screens/AIRecommendScreen";
+import { WeeklyPlanScreen } from "./screens/WeeklyPlanScreen";
 
 const STEPS: { screen: ScreenName; n: string; label: string }[] = [
   { screen: "linking", n: "01", label: "Connect the bank" },
@@ -75,6 +77,16 @@ export function AppShell() {
   const [aiLlmEnhanced, setAiLlmEnhanced] = useState(false);
   const [aiChatMessages, setAiChatMessages] = useState<ChatMessage[]>([]);
   const [aiChatBusy, setAiChatBusy] = useState(false);
+  // Picking a suggestion here is a plan, not a commitment — it must not
+  // touch points or the timeline. Only "Go to habit tracking" applies the
+  // selection for real, via the same toggle every other habit uses.
+  const [aiSelectedIds, setAiSelectedIds] = useState<Set<string>>(new Set());
+
+  const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan | null>(null);
+  const [weeklyPlanLoading, setWeeklyPlanLoading] = useState(false);
+  const [weeklyPlanWeek, setWeeklyPlanWeek] = useState(1);
+  const [aiCheckBusy, setAiCheckBusy] = useState(false);
+  const [aiCheckNarration, setAiCheckNarration] = useState<string | null>(null);
 
   const [goalName, setGoalName] = useState("");
   const [goalAmountStr, setGoalAmountStr] = useState("");
@@ -89,6 +101,10 @@ export function AppShell() {
     message: "",
     weeksEarly: 0,
   });
+  // Goals used to need a manual "Mark goal reached" click. Reaching one is
+  // now detected automatically (timeline.pct >= 100, i.e. saved == target)
+  // instead — this just stops the same goal firing the celebration twice.
+  const autoCompletedGoalIds = useRef<Set<string>>(new Set());
 
   const leverTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const nameTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -219,6 +235,7 @@ export function AppShell() {
   const loadAIRecommendations = useCallback(async (pid: string, goalId: string) => {
     setAiLoading(true);
     setAiChatMessages([]);
+    setAiSelectedIds(new Set());
     try {
       const [suggestions, narrated, status] = await Promise.all([
         api.getAIHabits(pid, goalId),
@@ -268,12 +285,98 @@ export function AppShell() {
     }
   };
 
-  const onToggleAIHabit = async (habitId: string) => {
-    await onToggleHabit(habitId);
-    // Drop it from whatever's currently shown rather than refetching the
-    // broad ranked list — a chat-narrowed shortlist shouldn't get replaced
-    // by an unrelated refetch just because one card got ticked.
-    setAiSuggestions((prev) => prev.filter((s) => s.habit.habitId !== habitId));
+  // Local-only: flips whether a suggestion is part of the plan. No API call —
+  // picking a habit here must not move points or the timeline, only actually
+  // committing to it (see onCommitAIRecommendations below) does that.
+  const onSelectAIHabit = (habitId: string) => {
+    setAiSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(habitId)) next.delete(habitId);
+      else next.add(habitId);
+      return next;
+    });
+  };
+
+  // A weekly plan can run at most this many weeks — a goal set for, say, 3
+  // years shouldn't produce 150 week-chips; long goals get a rolling
+  // 12-week plan instead of one that spans the whole thing.
+  const MAX_PLAN_WEEKS = 12;
+
+  const onCommitAIRecommendations = async () => {
+    if (!personaId || !goal) return;
+    const committed = Array.from(aiSelectedIds);
+    let latestTimeline = timeline;
+    // commitHabit (not toggleHabit): adds each to the plan and moves the
+    // timeline, but never awards points — points come only from completing
+    // a habit in a given week on the weekly plan screen.
+    for (const habitId of committed) {
+      const res = await api.commitHabit(personaId, habitId, goal.goalId, lever);
+      setHabits((prev) =>
+        prev
+          ? prev.map((h) =>
+              h.habit.habitId === habitId
+                ? { habit: res.habit, ticked: res.ticked, explanation: res.explanation }
+                : h
+            )
+          : prev
+      );
+      latestTimeline = res.timeline;
+      setTimeline(res.timeline);
+      setGoalTimelines((prevTl) => ({ ...prevTl, [goal.goalId]: res.timeline }));
+    }
+    setAiSelectedIds(new Set());
+
+    if (committed.length === 0) {
+      // Nothing chosen — nothing to plan for, go straight to the tracker.
+      setScreen("breakdown");
+      return;
+    }
+    api.getSavingsHistory(personaId, goal.goalId, lever).then(setSavingsHistory);
+
+    setWeeklyPlan(null);
+    setWeeklyPlanWeek(1);
+    setAiCheckNarration(null);
+    setScreen("weekly-plan");
+    setWeeklyPlanLoading(true);
+    try {
+      const existing = await api.getWeeklyPlan(personaId, goal.goalId);
+      if (existing) {
+        setWeeklyPlan(existing);
+      } else {
+        // The goal already has a timeframe — the plan runs for exactly
+        // that, never a separately-chosen number of weeks.
+        const totalWeeks = Math.max(1, Math.min(MAX_PLAN_WEEKS, latestTimeline?.idealWeeks ?? 4));
+        const plan = await api.createWeeklyPlan(personaId, goal.goalId, totalWeeks, committed);
+        setWeeklyPlan(plan);
+      }
+    } finally {
+      setWeeklyPlanLoading(false);
+    }
+  };
+
+  const onToggleWeekHabit = async (weekNumber: number, habitId: string) => {
+    if (!personaId || !goal) return;
+    const res = await api.toggleWeeklyPlanHabit(personaId, goal.goalId, weekNumber, habitId);
+    setWeeklyPlan(res.plan);
+    setProfile((p) => (p ? { ...p, points: res.points } : p));
+  };
+
+  const onSelectWeeklyPlanWeek = (week: number) => {
+    setWeeklyPlanWeek(week);
+    setAiCheckNarration(null);
+  };
+
+  const onAICheckWeek = async () => {
+    if (!personaId || !goal) return;
+    setAiCheckBusy(true);
+    try {
+      const res = await api.aiCheckWeek(personaId, goal.goalId, weeklyPlanWeek);
+      setWeeklyPlan(res.plan);
+      setProfile((p) => (p ? { ...p, points: res.points } : p));
+      setAiCheckNarration(res.narration);
+    } finally {
+      setAiCheckBusy(false);
+    }
   };
 
   const onLeverChange = (v: number) => {
@@ -382,6 +485,17 @@ export function AppShell() {
       weeksEarly,
     });
   };
+
+  // Auto-detects a goal actually being reached (saved == target) and fires
+  // the celebration on its own — no "Mark goal reached" click required.
+  useEffect(() => {
+    if (!goal || !timeline || celebration.open) return;
+    if (timeline.pct < 100) return;
+    if (autoCompletedGoalIds.current.has(goal.goalId)) return;
+    autoCompletedGoalIds.current.add(goal.goalId);
+    onCompleteGoal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goal?.goalId, timeline?.pct, celebration.open]);
 
   const onClaimReward = async (tierPoints: number) => {
     if (!personaId) return;
@@ -625,16 +739,34 @@ export function AppShell() {
               <AIRecommendScreen
                 goalName={goal.label}
                 goalEmoji={goal.emoji}
-                points={points}
                 loading={aiLoading}
                 narration={aiNarration}
                 llmEnhanced={aiLlmEnhanced}
                 suggestions={aiSuggestions}
+                selectedIds={aiSelectedIds}
                 chatMessages={aiChatMessages}
                 chatBusy={aiChatBusy}
-                onToggle={onToggleAIHabit}
+                onToggle={onSelectAIHabit}
                 onChatSend={onAIChatSend}
                 onBack={() => setScreen("home")}
+                onContinue={onCommitAIRecommendations}
+              />
+            )}
+            {screen === "weekly-plan" && (
+              <WeeklyPlanScreen
+                goalName={goal.label}
+                goalEmoji={goal.emoji}
+                points={points}
+                goalWeeksRemaining={timeline.weeks}
+                plan={weeklyPlan}
+                loading={weeklyPlanLoading}
+                selectedWeek={weeklyPlanWeek}
+                onSelectWeek={onSelectWeeklyPlanWeek}
+                onToggleWeekHabit={onToggleWeekHabit}
+                aiCheckBusy={aiCheckBusy}
+                aiCheckNarration={aiCheckNarration}
+                onAICheck={onAICheckWeek}
+                onBack={() => setScreen("ai-recommend")}
                 onContinue={() => setScreen("breakdown")}
               />
             )}
@@ -647,8 +779,6 @@ export function AppShell() {
                 onBack={() => setScreen("home")}
                 onToggleHabit={onToggleHabit}
                 onEditTarget={() => setScreen("editgoal")}
-                onComplete={onCompleteGoal}
-                onKeepSaving={() => setScreen("home")}
               />
             )}
             {screen === "timeline" && (

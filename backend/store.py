@@ -1,4 +1,5 @@
 import json
+from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
@@ -30,6 +31,24 @@ CUSTOM_HABITS: dict[str, list[HabitLibraryEntry]] = {}  # keyed by profileId
 GENERATED_PROFILES: dict = {}  # keyed by userId -> Profile
 
 
+@dataclass
+class WeeklyPlanState:
+    """A real week-by-week checklist for a goal: totalWeeks separate weeks,
+    each with its own completion state per habit — ticking a habit in week 1
+    does not carry over to week 2, matching a real recurring habit tracker
+    rather than the one-time "is this active" toggle TICKED_HABITS holds.
+    Points are earned per week a habit is completed, on top of (not instead
+    of) the ongoing weekly saving that habit already contributes via
+    TICKED_HABITS/compute_timeline."""
+
+    total_weeks: int
+    habit_ids: list[str]
+    completions: dict[int, set[str]] = field(default_factory=dict)  # weekNumber(1-indexed) -> {habitId}
+
+
+WEEKLY_PLANS: dict[str, WeeklyPlanState] = {}  # keyed by f"{profileId}:{goalId}"
+
+
 def load_payload() -> None:
     global PAYLOAD
     raw = json.loads(DATA_FILE.read_text(encoding="utf-8"))
@@ -45,6 +64,7 @@ def reset_all() -> None:
     LEVER.clear()
     GENERATED_PROFILES.clear()
     CUSTOM_HABITS.clear()
+    WEEKLY_PLANS.clear()
     for profile in PAYLOAD.profiles:
         TICKED_HABITS[profile.userId] = set()
         POINTS[profile.userId] = profile.points.model_copy()
@@ -182,6 +202,28 @@ def seed_demo_goals(profile_id: str = "u_maya") -> int:
 
 def today_month_key() -> str:
     return date.today().strftime("%Y-%m")
+
+
+def resolve_habit(profile, goal, habit_id: str) -> HabitLibraryEntry | None:
+    """Finds a habit by id across all three places one can come from: the
+    curated library, this profile's custom (free-typed) habits, or — if
+    neither matches — the AI-generated candidate pool for this goal. Shared
+    by the habit toggle endpoint and the weekly-plan endpoints so an
+    AI-generated habitId resolves the same way in both."""
+    habit = next((h for h in PAYLOAD.habitLibrary if h.habitId == habit_id), None)
+    if habit is not None:
+        return habit
+
+    habit = next((h for h in CUSTOM_HABITS.get(profile.userId, []) if h.habitId == habit_id), None)
+    if habit is not None:
+        return habit
+
+    from ai_habits import generate_ai_habits
+
+    label, target, ideal = effective_goal_fields(goal)
+    ai_suggestions = generate_ai_habits(PAYLOAD, profile, goal, target, ideal, ticked_habit_ids=set(), max_habits=10)
+    match = next((s for s in ai_suggestions if s.habit.habitId == habit_id), None)
+    return match.habit if match else None
 
 
 reset_all()

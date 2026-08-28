@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Shard {
   x: number;
@@ -40,6 +40,7 @@ export function CelebrationOverlay({
   onBack: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -86,6 +87,27 @@ export function CelebrationOverlay({
   const headline =
     weeksEarly > 0 ? `You got there\n${weeksEarly} week${weeksEarly === 1 ? "" : "s"} early` : "You got there";
 
+  const shareText =
+    weeksEarly > 0
+      ? `I just hit my "${goalName}" goal ${weeksEarly} week${weeksEarly === 1 ? "" : "s"} early on Able AI.`
+      : `I just hit my "${goalName}" goal on Able AI.`;
+
+  const handleShare = async () => {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ text: shareText });
+      } catch {
+        // user cancelled the share sheet — not an error
+      }
+      return;
+    }
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      await navigator.clipboard.writeText(shareText);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
+
   return (
     <div
       className="celebrate"
@@ -122,6 +144,9 @@ export function CelebrationOverlay({
       <div className="cel-actions">
         <button id="celNext" className="btn btn-lime" onClick={onSeeRewards}>
           See rewards
+        </button>
+        <button className="btn btn-onink" onClick={handleShare}>
+          {shareCopied ? "Copied — paste it anywhere" : "Share with friends"}
         </button>
         <button className="btn btn-onink" onClick={onBack}>
           Back to goals

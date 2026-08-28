@@ -36,7 +36,7 @@ export function HabitRow({
   const isSelect = variant === "select";
 
   return (
-    <div className="habit-block" data-done={ticked ? "true" : "false"}>
+    <div className={`habit-block${isSelect ? " is-select" : ""}`} data-done={ticked ? "true" : "false"}>
       <div className="habit">
         <button
           className={isSelect ? "box box-square" : "box"}

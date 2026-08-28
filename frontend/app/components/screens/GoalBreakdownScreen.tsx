@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Goal, HabitEntry, TimelineResult } from "@/lib/types";
-import { money } from "@/lib/format";
+import { money, money2 } from "@/lib/format";
 import { Icon } from "@/lib/icons";
 import { HabitRow } from "../HabitRow";
 import { railGeometry } from "../GoalCard";
@@ -123,7 +123,7 @@ export function GoalBreakdownScreen({
                 ? "Distance remaining"
                 : unknown
                 ? "Left over last month"
-                : `At ${money(timeline.weekly)} a week you arrive in`}
+                : `At ${money2(timeline.weekly)} a week you arrive in`}
             </span>
             <span className="num num-lead" aria-live="polite" style={{ color: toneInk }}>
               {unknown ? "£0.00" : `${weeks} weeks`}

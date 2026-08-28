@@ -1,18 +1,18 @@
 "use client";
 
 import type { WeeklyPlan } from "@/lib/types";
-import { PrimaryButton, GhostButton } from "../Buttons";
+import { PrimaryButton } from "../Buttons";
 import { Chip } from "../Chip";
 import { HabitRow } from "../HabitRow";
 import { PointsCounter } from "../PointsCounter";
-
-const WEEK_OPTIONS = [2, 4, 6, 8, 12];
 
 // Sits between committing to habits (AI recommend, or the Action Center) and
 // the main dashboard: a real week-by-week checklist, not the single ongoing
 // "is this active" toggle used elsewhere. Each week is tracked separately —
 // ticking a habit in week 2 doesn't carry over to week 3 — and completing
-// one earns its points fresh each week (backend/routers/weekly_plan.py).
+// one earns its points fresh each week (backend/routers/weekly_plan.py). The
+// plan always runs for exactly the weeks the goal itself was set for
+// (AppShell creates it from timeline.idealWeeks) — never a separate pick.
 export function WeeklyPlanScreen({
   goalName,
   goalEmoji,
@@ -21,7 +21,6 @@ export function WeeklyPlanScreen({
   loading,
   selectedWeek,
   onSelectWeek,
-  onCreatePlan,
   onToggleWeekHabit,
   onBack,
   onContinue,
@@ -33,7 +32,6 @@ export function WeeklyPlanScreen({
   loading: boolean;
   selectedWeek: number;
   onSelectWeek: (week: number) => void;
-  onCreatePlan: (totalWeeks: number) => void;
   onToggleWeekHabit: (weekNumber: number, habitId: string) => void;
   onBack: () => void;
   onContinue: () => void;
@@ -67,20 +65,9 @@ export function WeeklyPlanScreen({
         </h3>
       </div>
 
-      {!plan && !loading && (
-        <div className="card col" style={{ gap: 14 }}>
-          <span className="eyebrow">How many weeks?</span>
-          <p className="small muted">
-            Each week gets its own checklist — you tick a habit fresh every week to earn that
-            week&apos;s points.
-          </p>
-          <div className="chips">
-            {WEEK_OPTIONS.map((w) => (
-              <Chip key={w} onClick={() => onCreatePlan(w)}>
-                {w} weeks
-              </Chip>
-            ))}
-          </div>
+      {!plan && loading && (
+        <div className="card col" style={{ gap: 6 }}>
+          <p className="small muted">Setting up your weekly plan…</p>
         </div>
       )}
 
@@ -129,10 +116,7 @@ export function WeeklyPlanScreen({
       )}
 
       <div style={{ flex: 1 }} />
-      <div className="col" style={{ gap: 10 }}>
-        <PrimaryButton onClick={onContinue}>Are you ready? Go to my goal</PrimaryButton>
-        {!plan && <GhostButton onClick={onContinue}>Skip the weekly plan</GhostButton>}
-      </div>
+      <PrimaryButton onClick={onContinue}>Are you ready? Go to my goal</PrimaryButton>
     </section>
   );
 }

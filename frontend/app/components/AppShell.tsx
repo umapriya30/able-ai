@@ -85,10 +85,6 @@ export function AppShell() {
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan | null>(null);
   const [weeklyPlanLoading, setWeeklyPlanLoading] = useState(false);
   const [weeklyPlanWeek, setWeeklyPlanWeek] = useState(1);
-  // The habits to build a *new* plan from, captured at the moment they're
-  // committed on the AI recommend screen — kept separate from aiSelectedIds
-  // since that gets cleared right after committing.
-  const [weeklyPlanHabitIds, setWeeklyPlanHabitIds] = useState<string[]>([]);
 
   const [goalName, setGoalName] = useState("");
   const [goalAmountStr, setGoalAmountStr] = useState("");
@@ -295,9 +291,15 @@ export function AppShell() {
     });
   };
 
+  // A weekly plan can run at most this many weeks — a goal set for, say, 3
+  // years shouldn't produce 150 week-chips; long goals get a rolling
+  // 12-week plan instead of one that spans the whole thing.
+  const MAX_PLAN_WEEKS = 12;
+
   const onCommitAIRecommendations = async () => {
     if (!personaId || !goal) return;
     const committed = Array.from(aiSelectedIds);
+    let latestTimeline = timeline;
     // commitHabit (not toggleHabit): adds each to the plan and moves the
     // timeline, but never awards points — points come only from completing
     // a habit in a given week on the weekly plan screen.
@@ -312,14 +314,19 @@ export function AppShell() {
             )
           : prev
       );
+      latestTimeline = res.timeline;
       setTimeline(res.timeline);
       setGoalTimelines((prevTl) => ({ ...prevTl, [goal.goalId]: res.timeline }));
     }
-    if (committed.length > 0) {
-      api.getSavingsHistory(personaId, goal.goalId, lever).then(setSavingsHistory);
-    }
     setAiSelectedIds(new Set());
-    setWeeklyPlanHabitIds(committed);
+
+    if (committed.length === 0) {
+      // Nothing chosen — nothing to plan for, go straight to the tracker.
+      setScreen("breakdown");
+      return;
+    }
+    api.getSavingsHistory(personaId, goal.goalId, lever).then(setSavingsHistory);
+
     setWeeklyPlan(null);
     setWeeklyPlanWeek(1);
     setScreen("weekly-plan");
@@ -328,19 +335,13 @@ export function AppShell() {
       const existing = await api.getWeeklyPlan(personaId, goal.goalId);
       if (existing) {
         setWeeklyPlan(existing);
+      } else {
+        // The goal already has a timeframe — the plan runs for exactly
+        // that, never a separately-chosen number of weeks.
+        const totalWeeks = Math.max(1, Math.min(MAX_PLAN_WEEKS, latestTimeline?.idealWeeks ?? 4));
+        const plan = await api.createWeeklyPlan(personaId, goal.goalId, totalWeeks, committed);
+        setWeeklyPlan(plan);
       }
-    } finally {
-      setWeeklyPlanLoading(false);
-    }
-  };
-
-  const onCreateWeeklyPlan = async (totalWeeks: number) => {
-    if (!personaId || !goal) return;
-    setWeeklyPlanLoading(true);
-    try {
-      const plan = await api.createWeeklyPlan(personaId, goal.goalId, totalWeeks, weeklyPlanHabitIds);
-      setWeeklyPlan(plan);
-      setWeeklyPlanWeek(1);
     } finally {
       setWeeklyPlanLoading(false);
     }
@@ -724,7 +725,6 @@ export function AppShell() {
                 loading={weeklyPlanLoading}
                 selectedWeek={weeklyPlanWeek}
                 onSelectWeek={setWeeklyPlanWeek}
-                onCreatePlan={onCreateWeeklyPlan}
                 onToggleWeekHabit={onToggleWeekHabit}
                 onBack={() => setScreen("ai-recommend")}
                 onContinue={() => setScreen("breakdown")}

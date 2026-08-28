@@ -960,6 +960,13 @@ p {
   color: var(--momentum-ink);
   text-decoration: line-through;
 }
+/* AI recommendation screen: picking a habit is a selection, not a completed
+   task — the green fill still shows it's picked, but no strikethrough.
+   Strikethrough is reserved for the weekly plan, where a habit is actually
+   completed for that week. */
+.habit-block.is-select[data-done="true"] .habit-label {
+  text-decoration: none;
+}
 .habit-block[data-done="true"] .habit-meta,
 .habit-block[data-done="true"] .chev {
   color: var(--momentum-ink);

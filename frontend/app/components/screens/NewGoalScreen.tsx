@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { GoalCreateInput, Profile } from "@/lib/types";
-import { money } from "@/lib/format";
+import { money, money2 } from "@/lib/format";
 
 const WEEKS_PER_MONTH = 4.345;
 const EMOJI = ["🏠", "👟", "✈️", "🎓", "🚗", "🎁"];
@@ -131,7 +131,7 @@ export function NewGoalScreen({
               className="why-body"
               style={{ color: affordable ? "var(--momentum-ink)" : "var(--slip-ink)" }}
             >
-              At {money(baselineWeekly)} a week this is {weeksAtBaseline} weeks away.{" "}
+              At {money2(baselineWeekly)} a week this is {weeksAtBaseline} weeks away.{" "}
               {affordable ? "Comfortable." : "We will show you a route."}
             </p>
           </div>
@@ -222,7 +222,7 @@ export function NewGoalScreen({
           <span className="eyebrow">per week</span>
         </div>
         <p className="small muted">
-          Your spending currently leaves {money(baselineWeekly)} a week. We will show you the
+          Your spending currently leaves {money2(baselineWeekly)} a week. We will show you the
           honest distance next.
         </p>
       </div>

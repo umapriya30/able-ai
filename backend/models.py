@@ -202,6 +202,21 @@ class HabitEntry(BaseModel):
     explanation: str
 
 
+class ChatMessage(BaseModel):
+    role: str  # "user" | "assistant"
+    content: str
+
+
+class AIChatRequest(BaseModel):
+    message: str
+    history: list[ChatMessage] = []
+
+
+class AIChatResponse(BaseModel):
+    reply: str
+    suggestions: list[AIHabitSuggestion]
+
+
 class LoginRequest(BaseModel):
     name: str
 

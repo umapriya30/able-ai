@@ -6,6 +6,7 @@ import { money } from "@/lib/format";
 import type {
   AIHabitSuggestion,
   Bank,
+  ChatMessage,
   HabitEntry,
   HabitLibraryEntry,
   Profile,
@@ -72,6 +73,8 @@ export function AppShell() {
   const [aiNarration, setAiNarration] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiLlmEnhanced, setAiLlmEnhanced] = useState(false);
+  const [aiChatMessages, setAiChatMessages] = useState<ChatMessage[]>([]);
+  const [aiChatBusy, setAiChatBusy] = useState(false);
 
   const [goalName, setGoalName] = useState("");
   const [goalAmountStr, setGoalAmountStr] = useState("");
@@ -215,6 +218,7 @@ export function AppShell() {
 
   const loadAIRecommendations = useCallback(async (pid: string, goalId: string) => {
     setAiLoading(true);
+    setAiChatMessages([]);
     try {
       const [suggestions, narrated, status] = await Promise.all([
         api.getAIHabits(pid, goalId),
@@ -250,11 +254,26 @@ export function AppShell() {
     loadAIRecommendations(personaId, goalId);
   };
 
+  const onAIChatSend = async (message: string) => {
+    if (!personaId || !goal) return;
+    const nextMessages: ChatMessage[] = [...aiChatMessages, { role: "user", content: message }];
+    setAiChatMessages(nextMessages);
+    setAiChatBusy(true);
+    try {
+      const res = await api.chatAboutHabits(personaId, goal.goalId, message, aiChatMessages);
+      setAiSuggestions(res.suggestions);
+      setAiChatMessages([...nextMessages, { role: "assistant", content: res.reply }]);
+    } finally {
+      setAiChatBusy(false);
+    }
+  };
+
   const onToggleAIHabit = async (habitId: string) => {
     await onToggleHabit(habitId);
-    if (personaId && goal) {
-      api.getAIHabits(personaId, goal.goalId).then(setAiSuggestions);
-    }
+    // Drop it from whatever's currently shown rather than refetching the
+    // broad ranked list — a chat-narrowed shortlist shouldn't get replaced
+    // by an unrelated refetch just because one card got ticked.
+    setAiSuggestions((prev) => prev.filter((s) => s.habit.habitId !== habitId));
   };
 
   const onLeverChange = (v: number) => {
@@ -611,7 +630,10 @@ export function AppShell() {
                 narration={aiNarration}
                 llmEnhanced={aiLlmEnhanced}
                 suggestions={aiSuggestions}
+                chatMessages={aiChatMessages}
+                chatBusy={aiChatBusy}
                 onToggle={onToggleAIHabit}
+                onChatSend={onAIChatSend}
                 onBack={() => setScreen("home")}
                 onContinue={() => setScreen("breakdown")}
               />

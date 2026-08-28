@@ -1,6 +1,8 @@
 import type {
+  AIChatResponse,
   AIHabitSuggestion,
   Bank,
+  ChatMessage,
   ClaimRewardResponse,
   CustomHabitInput,
   GoalCompleteResponse,
@@ -119,6 +121,13 @@ export const api = {
     fetch(`${BASE}/ai/status`).then((r) =>
       json<{ narrationAvailable: boolean; llmEnhanced: boolean }>(r)
     ),
+
+  chatAboutHabits: (profileId: string, goalId: string, message: string, history: ChatMessage[]) =>
+    fetch(`${BASE}/profiles/${profileId}/ai-habits/${goalId}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, history }),
+    }).then((r) => json<AIChatResponse>(r)),
 
   seedDemo: () =>
     fetch(`${BASE}/demo/seed`, { method: "POST" }).then((r) => json<{ added: number }>(r)),

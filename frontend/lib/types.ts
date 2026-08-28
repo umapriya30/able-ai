@@ -138,6 +138,16 @@ export interface AIHabitSuggestion {
   weeksSaved: number;
 }
 
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface AIChatResponse {
+  reply: string;
+  suggestions: AIHabitSuggestion[];
+}
+
 export interface HabitToggleResponse {
   habit: HabitLibraryEntry;
   ticked: boolean;

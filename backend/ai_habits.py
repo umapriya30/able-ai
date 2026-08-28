@@ -31,7 +31,7 @@ import math
 
 from config import settings
 from logic import WEEKS_PER_MONTH, compute_timeline, explain_habit
-from models import AIHabitSuggestion, Goal, HabitLibraryEntry, Payload, Profile
+from models import AIHabitSuggestion, ChatMessage, Goal, HabitLibraryEntry, Payload, Profile
 
 
 def generate_ai_habits(
@@ -232,3 +232,113 @@ def narrate_plan_groq(profile: Profile, goal: Goal, suggestions: list[AIHabitSug
     if not content:
         raise RuntimeError("Groq returned no narration content")
     return content
+
+
+def chat_about_habits(
+    payload: Payload,
+    profile: Profile,
+    goal: Goal,
+    target_amount: float,
+    ideal_timeframe_months: float,
+    ticked_habit_ids: set[str],
+    message: str,
+    history: list[ChatMessage],
+) -> tuple[str, list[AIHabitSuggestion]]:
+    """Lets the user steer the AI-generated shortlist by conversation — "swap
+    coffee for something else", "I don't want to skip lunch", "show me
+    something bigger". The model can only pick from the same computed
+    candidate pool generate_ai_habits() already produced; it never invents a
+    new habit, category, or £ figure — a chat reply can change *which*
+    suggestions are shown, never their numbers. Applying one still goes
+    through the normal tick/toggle flow, not this endpoint.
+    """
+    candidates = generate_ai_habits(
+        payload, profile, goal, target_amount, ideal_timeframe_months,
+        ticked_habit_ids=ticked_habit_ids, max_habits=10,
+    )
+    if not candidates:
+        return "Nothing left to suggest — every easy category's already covered.", []
+
+    if not settings.ai_narration_enabled:
+        return (
+            "AI chat needs GROQ_API_KEY set — showing your current top picks instead.",
+            candidates[:3],
+        )
+
+    try:
+        return _chat_about_habits_groq(profile, goal, candidates, message, history)
+    except Exception:
+        return "Had trouble reaching the AI just now — here's the current shortlist.", candidates[:3]
+
+
+def _chat_about_habits_groq(
+    profile: Profile,
+    goal: Goal,
+    candidates: list[AIHabitSuggestion],
+    message: str,
+    history: list[ChatMessage],
+) -> tuple[str, list[AIHabitSuggestion]]:
+    from groq import Groq  # lazy import: only needed when narration is enabled
+
+    client = Groq()
+    candidate_lines = "\n".join(
+        f"{c.habit.habitId}: {c.habit.label} — £{c.habit.weeklySaving:.2f}/week, "
+        f"{c.habit.kind}, category {c.habit.categoryId}. {c.explanation}"
+        for c in candidates
+    )
+    # A single "user" message, not multi-turn system+history: gpt-oss-20b on
+    # Groq intermittently mis-emits a tool-call wrapper around plain text
+    # when given a system role plus conversation history, which the server
+    # then rejects with "Tool choice is none, but model called a tool" even
+    # though no tools were ever defined — reproduced during testing. Folding
+    # everything into one message, the same pattern narrate_plan_groq() uses
+    # successfully, avoids that path entirely.
+    history_lines = "\n".join(
+        f"{'User' if m.role != 'assistant' else 'You'}: {m.content}" for m in history[-6:]
+    )
+    prompt = (
+        f"You are helping {profile.displayName} choose which habit suggestions to focus on "
+        f"for their '{goal.label}' savings goal. You may ONLY recommend habits from this exact "
+        f"candidate list — never invent a new habit, category, or £ figure:\n\n{candidate_lines}\n\n"
+        + (f"Conversation so far:\n{history_lines}\n\n" if history_lines else "")
+        + f"User's new message: \"{message}\"\n\n"
+        f"When the user asks to change, swap, remove, or focus the suggestions, pick the best "
+        f"matching habits from the list above (max 3, ordered by relevance to their request). "
+        f"If nothing in the list matches what they're asking for, say so plainly instead of "
+        f"picking an unrelated one. Never say 'you should' or give financial advice — frame "
+        f"things as 'if you did X, this would happen'. Reply in EXACTLY this two-line format, "
+        f"nothing else, no markdown:\n"
+        f"REPLY: <one short, warm sentence, max 30 words>\n"
+        f"HABIT_IDS: <comma-separated habitIds from the list above, 1-3 of them, or NONE>"
+    )
+
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        max_tokens=300,
+        reasoning_effort="low",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    content = response.choices[0].message.content or ""
+    reply, habit_ids = _parse_chat_reply(content)
+    if not reply:
+        raise RuntimeError("Groq returned no chat content")
+
+    by_id = {c.habit.habitId: c for c in candidates}
+    picked = [by_id[h] for h in habit_ids if h in by_id]
+    if not picked:
+        picked = candidates[:3]
+    return reply, picked
+
+
+def _parse_chat_reply(content: str) -> tuple[str, list[str]]:
+    reply = ""
+    habit_ids: list[str] = []
+    for line in content.splitlines():
+        line = line.strip()
+        if line.upper().startswith("REPLY:"):
+            reply = line.split(":", 1)[1].strip()
+        elif line.upper().startswith("HABIT_IDS:"):
+            raw = line.split(":", 1)[1].strip()
+            if raw.upper() != "NONE":
+                habit_ids = [h.strip() for h in raw.split(",") if h.strip()]
+    return reply, habit_ids

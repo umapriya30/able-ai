@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { AIHabitSuggestion } from "@/lib/types";
+import type { AIHabitSuggestion, ChatMessage } from "@/lib/types";
 import { PrimaryButton } from "../Buttons";
 import { HabitRow } from "../HabitRow";
 import { PointsCounter } from "../PointsCounter";
+import { AIChatBox } from "../AIChatBox";
 
 // Sits between opening a goal and the habit-tracking action center: reads
 // the profile's own spend categories (generate_ai_habits, backend/ai_habits.py)
@@ -19,7 +20,10 @@ export function AIRecommendScreen({
   narration,
   llmEnhanced,
   suggestions,
+  chatMessages,
+  chatBusy,
   onToggle,
+  onChatSend,
   onBack,
   onContinue,
 }: {
@@ -30,7 +34,10 @@ export function AIRecommendScreen({
   narration: string | null;
   llmEnhanced: boolean;
   suggestions: AIHabitSuggestion[];
+  chatMessages: ChatMessage[];
+  chatBusy: boolean;
   onToggle: (habitId: string) => void;
+  onChatSend: (message: string) => void;
   onBack: () => void;
   onContinue: () => void;
 }) {
@@ -88,6 +95,8 @@ export function AIRecommendScreen({
           </div>
         </div>
       )}
+
+      {!loading && <AIChatBox messages={chatMessages} busy={chatBusy} onSend={onChatSend} />}
 
       <div style={{ flex: 1 }} />
       <PrimaryButton onClick={onContinue}>Go to habit tracking</PrimaryButton>

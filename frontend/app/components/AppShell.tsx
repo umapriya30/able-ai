@@ -101,6 +101,10 @@ export function AppShell() {
     message: "",
     weeksEarly: 0,
   });
+  // Goals used to need a manual "Mark goal reached" click. Reaching one is
+  // now detected automatically (timeline.pct >= 100, i.e. saved == target)
+  // instead — this just stops the same goal firing the celebration twice.
+  const autoCompletedGoalIds = useRef<Set<string>>(new Set());
 
   const leverTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const nameTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -482,6 +486,17 @@ export function AppShell() {
     });
   };
 
+  // Auto-detects a goal actually being reached (saved == target) and fires
+  // the celebration on its own — no "Mark goal reached" click required.
+  useEffect(() => {
+    if (!goal || !timeline || celebration.open) return;
+    if (timeline.pct < 100) return;
+    if (autoCompletedGoalIds.current.has(goal.goalId)) return;
+    autoCompletedGoalIds.current.add(goal.goalId);
+    onCompleteGoal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goal?.goalId, timeline?.pct, celebration.open]);
+
   const onClaimReward = async (tierPoints: number) => {
     if (!personaId) return;
     setClaimBusy(tierPoints);
@@ -764,8 +779,6 @@ export function AppShell() {
                 onBack={() => setScreen("home")}
                 onToggleHabit={onToggleHabit}
                 onEditTarget={() => setScreen("editgoal")}
-                onComplete={onCompleteGoal}
-                onKeepSaving={() => setScreen("home")}
               />
             )}
             {screen === "timeline" && (

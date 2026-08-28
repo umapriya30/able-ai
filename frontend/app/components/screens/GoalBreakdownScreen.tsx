@@ -3,13 +3,14 @@
 import { useState } from "react";
 import type { Goal, HabitEntry, TimelineResult } from "@/lib/types";
 import { money, money2 } from "@/lib/format";
-import { Icon } from "@/lib/icons";
 import { HabitRow } from "../HabitRow";
 import { railGeometry } from "../GoalCard";
 
 // The reality check — design boards 07 (behind), 08 (habit expanded) and
 // 09 (habits ticked). One screen, three states of the same thing: the
-// distance, and the two kinds of habit that close it.
+// distance, and the two kinds of habit that close it. Reaching the goal is
+// detected and celebrated automatically (AppShell watches timeline.pct) —
+// there's no "mark as reached" action here to click.
 export function GoalBreakdownScreen({
   goal,
   timeline,
@@ -18,8 +19,6 @@ export function GoalBreakdownScreen({
   onBack,
   onToggleHabit,
   onEditTarget,
-  onComplete,
-  onKeepSaving,
 }: {
   goal: Goal;
   timeline: TimelineResult;
@@ -28,8 +27,6 @@ export function GoalBreakdownScreen({
   onBack: () => void;
   onToggleHabit: (habitId: string) => void;
   onEditTarget: () => void;
-  onComplete: () => void;
-  onKeepSaving: () => void;
 }) {
   const [openHabit, setOpenHabit] = useState<string | null>(null);
 
@@ -48,13 +45,9 @@ export function GoalBreakdownScreen({
   const ticked = habits.filter((h) => h.ticked).length;
   const reductive = habits.filter((h) => h.habit.kind !== "productive");
   const productive = habits.filter((h) => h.habit.kind === "productive");
-  // Two different things, and conflating them hid the button entirely:
-  //   complete  — the money is actually there (saved == target)
-  //   canMark   — the projection has met the goalpost, which is what the spec
-  //               means by "the timeline bar reaches the target goalpost" and
-  //               what makes "Mark goal reached" appear.
+  // The money is actually there (saved == target) — AppShell's effect
+  // watches this same figure and fires the celebration on its own.
   const complete = timeline.pct >= 100;
-  const canMark = !unknown && timeline.onTrack;
 
   const statusChip = complete
     ? { label: "Arrived", className: "chip chip-mo" }
@@ -187,20 +180,6 @@ export function GoalBreakdownScreen({
         <p className="small muted">
           Tick one and we will start measuring the distance from real money, not a guess.
         </p>
-      )}
-
-      {canMark && (
-        <div className="col" style={{ marginTop: "auto", gap: 10 }}>
-          <button className="btn" onClick={onComplete}>
-            <span className="glyph" aria-hidden="true">
-              <Icon name="mark" />
-            </span>
-            Mark goal reached
-          </button>
-          <button className="btn btn-ghost" onClick={onKeepSaving}>
-            Keep saving into this goal
-          </button>
-        </div>
       )}
     </section>
   );

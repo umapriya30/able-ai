@@ -177,8 +177,8 @@ def narrate_plan_template(profile: Profile, goal: Goal, suggestions: list[AIHabi
     )
 
     return (
-        f"If {profile.displayName} did {habits_clause}, that would free up "
-        f"£{weekly_total:.2f} a week{weeks_clause}."
+        f"If {profile.displayName} trimmed the regular spend behind {habits_clause}, that "
+        f"would free up £{weekly_total:.2f} a week{weeks_clause}."
     )
 
 
@@ -195,21 +195,33 @@ def narrate_plan_groq(profile: Profile, goal: Goal, suggestions: list[AIHabitSug
     from groq import Groq  # lazy import: only needed when narration is enabled
 
     client = Groq()
+    # Each line grounds the model in the *recurring* category spend behind the
+    # cut (s.explanation, e.g. "You currently spend £168/month on eating out"),
+    # not just the resulting weekly saving — that's the "regular pattern" this
+    # is meant to read from, short of a real per-transaction feed.
     habit_lines = "\n".join(
-        f"- {s.habit.label} (£{s.habit.weeklySaving:.2f}/week, {s.rationale})"
+        f"- {s.habit.label}: £{s.habit.weeklySaving:.2f}/week. {s.explanation}"
         for s in suggestions
     )
+    weekly_total = round(sum(s.habit.weeklySaving for s in suggestions), 2)
+    weeks_total = max((s.weeksSaved for s in suggestions), default=0)
+
     prompt = (
-        f"You are narrating a savings plan for {profile.displayName}, who is saving "
-        f"toward '{goal.label}'. Using ONLY these already-computed habit suggestions, "
-        f"write one warm, plain-English paragraph (2-3 sentences max) explaining the plan. "
-        f"Never invent a number that isn't listed. Never say 'you should' — frame everything "
-        f"as 'if you did X, this would happen'. Do not mention interest rates, investments, "
-        f"or any regulated financial product.\n\n{habit_lines}"
+        f"{profile.displayName} is saving toward '{goal.label}'. Below are their recurring "
+        f"discretionary spending categories and what trimming each would free up.\n\n"
+        f"{habit_lines}\n\n"
+        f"Combined: £{weekly_total:.2f}/week, up to {weeks_total} weeks CLOSER to {goal.label} "
+        f"(i.e. {weeks_total} fewer weeks of waiting — always describe this as time coming OFF "
+        f"the wait, never as the goal or the wait being 'extended' or 'lengthened').\n\n"
+        f"Write ONE short, insightful sentence (max 30 words) that names the spending pattern "
+        f"driving the gap and its combined effect — do NOT list each habit in its own clause. "
+        f"Use only the £ and week figures given; never invent a number. Frame it as 'if you "
+        f"did X' — never 'you should'. No interest rates, investments, or regulated financial "
+        f"products."
     )
     response = client.chat.completions.create(
         model="openai/gpt-oss-20b",
-        max_tokens=400,
+        max_tokens=250,
         # Without this, gpt-oss-20b can spend its entire token budget on hidden
         # reasoning and return empty content (finish_reason="length", 0 visible
         # output) — reproduced with the real 3-habit prompt during testing.

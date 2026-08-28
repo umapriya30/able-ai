@@ -978,6 +978,11 @@ p {
   background: var(--momentum);
   border-color: var(--momentum);
 }
+/* AI recommendation screen: a literal checkbox for "selected", distinct
+   from the round commit checkmark used everywhere else in the app. */
+.box-square {
+  border-radius: 10px;
+}
 .box svg {
   stroke: var(--card);
   stroke-width: 3;

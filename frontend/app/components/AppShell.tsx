@@ -16,6 +16,7 @@ import type {
   SignupInput,
   SpendSaveSummary,
   TimelineResult,
+  WeeklyPlan,
 } from "@/lib/types";
 import { SCREENS, type ScreenName } from "@/lib/screens";
 import { CelebrationOverlay } from "./CelebrationOverlay";
@@ -34,6 +35,7 @@ import { WelcomeScreen } from "./screens/WelcomeScreen";
 import { BankLinkScreen } from "./screens/BankLinkScreen";
 import { AnalysingScreen } from "./screens/AnalysingScreen";
 import { AIRecommendScreen } from "./screens/AIRecommendScreen";
+import { WeeklyPlanScreen } from "./screens/WeeklyPlanScreen";
 
 const STEPS: { screen: ScreenName; n: string; label: string }[] = [
   { screen: "linking", n: "01", label: "Connect the bank" },
@@ -75,6 +77,18 @@ export function AppShell() {
   const [aiLlmEnhanced, setAiLlmEnhanced] = useState(false);
   const [aiChatMessages, setAiChatMessages] = useState<ChatMessage[]>([]);
   const [aiChatBusy, setAiChatBusy] = useState(false);
+  // Picking a suggestion here is a plan, not a commitment — it must not
+  // touch points or the timeline. Only "Go to habit tracking" applies the
+  // selection for real, via the same toggle every other habit uses.
+  const [aiSelectedIds, setAiSelectedIds] = useState<Set<string>>(new Set());
+
+  const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan | null>(null);
+  const [weeklyPlanLoading, setWeeklyPlanLoading] = useState(false);
+  const [weeklyPlanWeek, setWeeklyPlanWeek] = useState(1);
+  // The habits to build a *new* plan from, captured at the moment they're
+  // committed on the AI recommend screen — kept separate from aiSelectedIds
+  // since that gets cleared right after committing.
+  const [weeklyPlanHabitIds, setWeeklyPlanHabitIds] = useState<string[]>([]);
 
   const [goalName, setGoalName] = useState("");
   const [goalAmountStr, setGoalAmountStr] = useState("");
@@ -219,6 +233,7 @@ export function AppShell() {
   const loadAIRecommendations = useCallback(async (pid: string, goalId: string) => {
     setAiLoading(true);
     setAiChatMessages([]);
+    setAiSelectedIds(new Set());
     try {
       const [suggestions, narrated, status] = await Promise.all([
         api.getAIHabits(pid, goalId),
@@ -268,12 +283,74 @@ export function AppShell() {
     }
   };
 
-  const onToggleAIHabit = async (habitId: string) => {
-    await onToggleHabit(habitId);
-    // Drop it from whatever's currently shown rather than refetching the
-    // broad ranked list — a chat-narrowed shortlist shouldn't get replaced
-    // by an unrelated refetch just because one card got ticked.
-    setAiSuggestions((prev) => prev.filter((s) => s.habit.habitId !== habitId));
+  // Local-only: flips whether a suggestion is part of the plan. No API call —
+  // picking a habit here must not move points or the timeline, only actually
+  // committing to it (see onCommitAIRecommendations below) does that.
+  const onSelectAIHabit = (habitId: string) => {
+    setAiSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(habitId)) next.delete(habitId);
+      else next.add(habitId);
+      return next;
+    });
+  };
+
+  const onCommitAIRecommendations = async () => {
+    if (!personaId || !goal) return;
+    const committed = Array.from(aiSelectedIds);
+    // commitHabit (not toggleHabit): adds each to the plan and moves the
+    // timeline, but never awards points — points come only from completing
+    // a habit in a given week on the weekly plan screen.
+    for (const habitId of committed) {
+      const res = await api.commitHabit(personaId, habitId, goal.goalId, lever);
+      setHabits((prev) =>
+        prev
+          ? prev.map((h) =>
+              h.habit.habitId === habitId
+                ? { habit: res.habit, ticked: res.ticked, explanation: res.explanation }
+                : h
+            )
+          : prev
+      );
+      setTimeline(res.timeline);
+      setGoalTimelines((prevTl) => ({ ...prevTl, [goal.goalId]: res.timeline }));
+    }
+    if (committed.length > 0) {
+      api.getSavingsHistory(personaId, goal.goalId, lever).then(setSavingsHistory);
+    }
+    setAiSelectedIds(new Set());
+    setWeeklyPlanHabitIds(committed);
+    setWeeklyPlan(null);
+    setWeeklyPlanWeek(1);
+    setScreen("weekly-plan");
+    setWeeklyPlanLoading(true);
+    try {
+      const existing = await api.getWeeklyPlan(personaId, goal.goalId);
+      if (existing) {
+        setWeeklyPlan(existing);
+      }
+    } finally {
+      setWeeklyPlanLoading(false);
+    }
+  };
+
+  const onCreateWeeklyPlan = async (totalWeeks: number) => {
+    if (!personaId || !goal) return;
+    setWeeklyPlanLoading(true);
+    try {
+      const plan = await api.createWeeklyPlan(personaId, goal.goalId, totalWeeks, weeklyPlanHabitIds);
+      setWeeklyPlan(plan);
+      setWeeklyPlanWeek(1);
+    } finally {
+      setWeeklyPlanLoading(false);
+    }
+  };
+
+  const onToggleWeekHabit = async (weekNumber: number, habitId: string) => {
+    if (!personaId || !goal) return;
+    const res = await api.toggleWeeklyPlanHabit(personaId, goal.goalId, weekNumber, habitId);
+    setWeeklyPlan(res.plan);
+    setProfile((p) => (p ? { ...p, points: res.points } : p));
   };
 
   const onLeverChange = (v: number) => {
@@ -625,16 +702,31 @@ export function AppShell() {
               <AIRecommendScreen
                 goalName={goal.label}
                 goalEmoji={goal.emoji}
-                points={points}
                 loading={aiLoading}
                 narration={aiNarration}
                 llmEnhanced={aiLlmEnhanced}
                 suggestions={aiSuggestions}
+                selectedIds={aiSelectedIds}
                 chatMessages={aiChatMessages}
                 chatBusy={aiChatBusy}
-                onToggle={onToggleAIHabit}
+                onToggle={onSelectAIHabit}
                 onChatSend={onAIChatSend}
                 onBack={() => setScreen("home")}
+                onContinue={onCommitAIRecommendations}
+              />
+            )}
+            {screen === "weekly-plan" && (
+              <WeeklyPlanScreen
+                goalName={goal.label}
+                goalEmoji={goal.emoji}
+                points={points}
+                plan={weeklyPlan}
+                loading={weeklyPlanLoading}
+                selectedWeek={weeklyPlanWeek}
+                onSelectWeek={setWeeklyPlanWeek}
+                onCreatePlan={onCreateWeeklyPlan}
+                onToggleWeekHabit={onToggleWeekHabit}
+                onBack={() => setScreen("ai-recommend")}
                 onContinue={() => setScreen("breakdown")}
               />
             )}

@@ -83,7 +83,7 @@ export function NewGoalScreen({
           <input
             className="goal-input"
             value={label}
-            placeholder="House deposit"
+            placeholder="Set goal"
             onChange={(e) => setLabel(e.target.value)}
             aria-label="Goal name"
           />

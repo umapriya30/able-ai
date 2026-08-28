@@ -212,6 +212,27 @@ class AIChatRequest(BaseModel):
     history: list[ChatMessage] = []
 
 
+class WeeklyPlanCreateInput(BaseModel):
+    totalWeeks: int
+    habitIds: list[str]
+
+
+class WeeklyPlanWeek(BaseModel):
+    weekNumber: int
+    habits: list[HabitEntry]  # ticked = completed in *this* week specifically
+
+
+class WeeklyPlan(BaseModel):
+    goalId: str
+    totalWeeks: int
+    weeks: list[WeeklyPlanWeek]
+
+
+class WeeklyPlanToggleResponse(BaseModel):
+    plan: WeeklyPlan
+    points: Points
+
+
 class AIChatResponse(BaseModel):
     reply: str
     suggestions: list[AIHabitSuggestion]

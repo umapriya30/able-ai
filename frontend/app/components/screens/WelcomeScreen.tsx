@@ -45,8 +45,8 @@ export function WelcomeScreen({
         </div>
 
         <div className="col" style={{ gap: 14 }}>
-          <h1 className="num hero-line">A savings goal, measured in weeks — not wishes.</h1>
-          <span className="eyebrow">Reads your real spending · shortens the wait</span>
+          <h1 className="num hero-line">Building financial habits to reach your goals — in weeks.</h1>
+          <span className="eyebrow">Reads your real spending · cuts the wait</span>
         </div>
       </div>
 

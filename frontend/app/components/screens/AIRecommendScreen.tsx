@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { AIHabitSuggestion, ChatMessage } from "@/lib/types";
 import { PrimaryButton } from "../Buttons";
 import { HabitRow } from "../HabitRow";
-import { PointsCounter } from "../PointsCounter";
 import { AIChatBox } from "../AIChatBox";
 
 // Sits between opening a goal and the habit-tracking action center: reads
@@ -15,11 +14,11 @@ import { AIChatBox } from "../AIChatBox";
 export function AIRecommendScreen({
   goalName,
   goalEmoji,
-  points,
   loading,
   narration,
   llmEnhanced,
   suggestions,
+  selectedIds,
   chatMessages,
   chatBusy,
   onToggle,
@@ -29,11 +28,11 @@ export function AIRecommendScreen({
 }: {
   goalName: string;
   goalEmoji: string;
-  points: number;
   loading: boolean;
   narration: string | null;
   llmEnhanced: boolean;
   suggestions: AIHabitSuggestion[];
+  selectedIds: Set<string>;
   chatMessages: ChatMessage[];
   chatBusy: boolean;
   onToggle: (habitId: string) => void;
@@ -59,7 +58,6 @@ export function AIRecommendScreen({
         <h2 className="h-md" style={{ flex: 1 }}>
           {goalName}
         </h2>
-        <PointsCounter value={points} />
       </div>
 
       <div className="col" style={{ gap: 4 }}>
@@ -79,17 +77,21 @@ export function AIRecommendScreen({
 
       {!loading && suggestions.length > 0 && (
         <div className="col" style={{ gap: 10 }}>
-          <span className="eyebrow">Ranked by weekly impact</span>
+          <div className="col" style={{ gap: 2 }}>
+            <span className="eyebrow">Ranked by weekly impact</span>
+            <span className="small muted">Pick which of these you want to start tracking.</span>
+          </div>
           <div className="habits">
             {suggestions.map((s) => (
               <HabitRow
                 key={s.habit.habitId}
                 habit={s.habit}
-                ticked={false}
+                ticked={selectedIds.has(s.habit.habitId)}
                 explanation={s.rationale}
                 expanded={openId === s.habit.habitId}
                 onToggle={() => onToggle(s.habit.habitId)}
                 onExpand={() => setOpenId((cur) => (cur === s.habit.habitId ? null : s.habit.habitId))}
+                variant="select"
               />
             ))}
           </div>
@@ -99,7 +101,11 @@ export function AIRecommendScreen({
       {!loading && <AIChatBox messages={chatMessages} busy={chatBusy} onSend={onChatSend} />}
 
       <div style={{ flex: 1 }} />
-      <PrimaryButton onClick={onContinue}>Go to habit tracking</PrimaryButton>
+      <PrimaryButton onClick={onContinue}>
+        {selectedIds.size > 0
+          ? `Track ${selectedIds.size} habit${selectedIds.size === 1 ? "" : "s"} & continue`
+          : "Go to habit tracking"}
+      </PrimaryButton>
     </section>
   );
 }

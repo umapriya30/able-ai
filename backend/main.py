@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import store
 from config import settings
 from models import Payload
-from routers import ai, profiles
+from routers import ai, profiles, weekly_plan
 
 app = FastAPI(title="Able AI API", description="Turning little habits into big benefits.")
 
@@ -18,6 +18,7 @@ app.add_middleware(
 
 app.include_router(profiles.router)
 app.include_router(ai.router)
+app.include_router(weekly_plan.router)
 
 
 @app.get("/health")

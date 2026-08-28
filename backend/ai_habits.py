@@ -30,8 +30,8 @@ this module already computed; it never invents its own figures or advice.
 import math
 
 from config import settings
-from logic import WEEKS_PER_MONTH, compute_timeline
-from models import AIHabitSuggestion, Goal, HabitLibraryEntry, Payload, Profile
+from logic import WEEKS_PER_MONTH, compute_timeline, explain_habit
+from models import AIHabitSuggestion, ChatMessage, Goal, HabitLibraryEntry, Payload, Profile
 
 
 def generate_ai_habits(
@@ -66,6 +66,7 @@ def generate_ai_habits(
                 weeklySaving=weekly_cut,
                 points=12,
                 personas=[profile.persona],
+                kind="reductive",  # a generated suggestion is always a category cut
                 generated=True,
             )
         )
@@ -99,7 +100,12 @@ def generate_ai_habits(
             else f"Adds £{candidate.weeklySaving:.2f}/week toward {goal.label}."
         )
         suggestions.append(
-            AIHabitSuggestion(habit=candidate, rationale=rationale, weeksSaved=weeks_saved)
+            AIHabitSuggestion(
+                habit=candidate,
+                rationale=rationale,
+                explanation=explain_habit(profile, candidate),
+                weeksSaved=weeks_saved,
+            )
         )
 
     return suggestions
@@ -116,7 +122,7 @@ def _ticked_total(payload: Payload, profile: Profile, ticked_habit_ids: set[str]
 def ai_narration_available() -> bool:
     """Narration itself is always available — see narrate_plan_template()
     below. This flag now reports whether the *LLM-upgraded* prose is active
-    (requires ANTHROPIC_API_KEY); the template fallback needs no key, no
+    (requires GROQ_API_KEY); the template fallback needs no key, no
     network, and no external account, so the feature never has to be
     switched off for a demo running without one."""
     return True
@@ -129,7 +135,7 @@ def llm_narration_available() -> bool:
 def narrate_plan(profile: Profile, goal: Goal, suggestions: list[AIHabitSuggestion]) -> str:
     """Narrate the already-computed suggestions as one warm paragraph.
 
-    Uses the real LLM when ANTHROPIC_API_KEY is set; otherwise falls back to
+    Uses the real LLM when GROQ_API_KEY is set; otherwise falls back to
     a deterministic template that reads the same numbers. Either way the
     figures themselves always come from generate_ai_habits() above, never
     from the model — this can never introduce an unverified figure or cross
@@ -137,7 +143,7 @@ def narrate_plan(profile: Profile, goal: Goal, suggestions: list[AIHabitSuggesti
     """
     if settings.ai_narration_enabled:
         try:
-            return narrate_plan_llm(profile, goal, suggestions)
+            return narrate_plan_groq(profile, goal, suggestions)
         except Exception:
             pass  # network/key trouble on stage shouldn't break the demo
     return narrate_plan_template(profile, goal, suggestions)
@@ -171,39 +177,168 @@ def narrate_plan_template(profile: Profile, goal: Goal, suggestions: list[AIHabi
     )
 
     return (
-        f"If {profile.displayName} did {habits_clause}, that would free up "
-        f"£{weekly_total:.2f} a week{weeks_clause}."
+        f"If {profile.displayName} trimmed the regular spend behind {habits_clause}, that "
+        f"would free up £{weekly_total:.2f} a week{weeks_clause}."
     )
 
 
-def narrate_plan_llm(profile: Profile, goal: Goal, suggestions: list[AIHabitSuggestion]) -> str:
+def narrate_plan_groq(profile: Profile, goal: Goal, suggestions: list[AIHabitSuggestion]) -> str:
     """The LLM-upgraded version of narrate_plan_template(), used only when
-    ANTHROPIC_API_KEY is set. Only called when narration is enabled — the
+    GROQ_API_KEY is set. Only called when narration is enabled — the
     numbers themselves always come from generate_ai_habits() above, never
     from the model, so this can never introduce an unverified figure or
     cross into "advice" framing.
     """
     if not settings.ai_narration_enabled:
-        raise RuntimeError("AI narration is not enabled — set ANTHROPIC_API_KEY to turn it on.")
+        raise RuntimeError("AI narration is not enabled — set GROQ_API_KEY to turn it on.")
 
-    import anthropic  # lazy import: only needed when narration is enabled
+    from groq import Groq  # lazy import: only needed when narration is enabled
 
-    client = anthropic.Anthropic()
+    client = Groq()
+    # Each line grounds the model in the *recurring* category spend behind the
+    # cut (s.explanation, e.g. "You currently spend £168/month on eating out"),
+    # not just the resulting weekly saving — that's the "regular pattern" this
+    # is meant to read from, short of a real per-transaction feed.
     habit_lines = "\n".join(
-        f"- {s.habit.label} (£{s.habit.weeklySaving:.2f}/week, {s.rationale})"
+        f"- {s.habit.label}: £{s.habit.weeklySaving:.2f}/week. {s.explanation}"
         for s in suggestions
     )
+    weekly_total = round(sum(s.habit.weeklySaving for s in suggestions), 2)
+    weeks_total = max((s.weeksSaved for s in suggestions), default=0)
+
     prompt = (
-        f"You are narrating a savings plan for {profile.displayName}, who is saving "
-        f"toward '{goal.label}'. Using ONLY these already-computed habit suggestions, "
-        f"write one warm, plain-English paragraph (2-3 sentences max) explaining the plan. "
-        f"Never invent a number that isn't listed. Never say 'you should' — frame everything "
-        f"as 'if you did X, this would happen'. Do not mention interest rates, investments, "
-        f"or any regulated financial product.\n\n{habit_lines}"
+        f"{profile.displayName} is saving toward '{goal.label}'. Below are their recurring "
+        f"discretionary spending categories and what trimming each would free up.\n\n"
+        f"{habit_lines}\n\n"
+        f"Combined: £{weekly_total:.2f}/week, up to {weeks_total} weeks CLOSER to {goal.label} "
+        f"(i.e. {weeks_total} fewer weeks of waiting — always describe this as time coming OFF "
+        f"the wait, never as the goal or the wait being 'extended' or 'lengthened').\n\n"
+        f"Write ONE short, insightful sentence (max 30 words) that names the spending pattern "
+        f"driving the gap and its combined effect — do NOT list each habit in its own clause. "
+        f"Use only the £ and week figures given; never invent a number. Frame it as 'if you "
+        f"did X' — never 'you should'. No interest rates, investments, or regulated financial "
+        f"products."
     )
-    response = client.messages.create(
-        model="claude-sonnet-5",
-        max_tokens=200,
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        max_tokens=250,
+        # Without this, gpt-oss-20b can spend its entire token budget on hidden
+        # reasoning and return empty content (finish_reason="length", 0 visible
+        # output) — reproduced with the real 3-habit prompt during testing.
+        reasoning_effort="low",
         messages=[{"role": "user", "content": prompt}],
     )
-    return response.content[0].text
+    content = response.choices[0].message.content
+    if not content:
+        raise RuntimeError("Groq returned no narration content")
+    return content
+
+
+def chat_about_habits(
+    payload: Payload,
+    profile: Profile,
+    goal: Goal,
+    target_amount: float,
+    ideal_timeframe_months: float,
+    ticked_habit_ids: set[str],
+    message: str,
+    history: list[ChatMessage],
+) -> tuple[str, list[AIHabitSuggestion]]:
+    """Lets the user steer the AI-generated shortlist by conversation — "swap
+    coffee for something else", "I don't want to skip lunch", "show me
+    something bigger". The model can only pick from the same computed
+    candidate pool generate_ai_habits() already produced; it never invents a
+    new habit, category, or £ figure — a chat reply can change *which*
+    suggestions are shown, never their numbers. Applying one still goes
+    through the normal tick/toggle flow, not this endpoint.
+    """
+    candidates = generate_ai_habits(
+        payload, profile, goal, target_amount, ideal_timeframe_months,
+        ticked_habit_ids=ticked_habit_ids, max_habits=10,
+    )
+    if not candidates:
+        return "Nothing left to suggest — every easy category's already covered.", []
+
+    if not settings.ai_narration_enabled:
+        return (
+            "AI chat needs GROQ_API_KEY set — showing your current top picks instead.",
+            candidates[:3],
+        )
+
+    try:
+        return _chat_about_habits_groq(profile, goal, candidates, message, history)
+    except Exception:
+        return "Had trouble reaching the AI just now — here's the current shortlist.", candidates[:3]
+
+
+def _chat_about_habits_groq(
+    profile: Profile,
+    goal: Goal,
+    candidates: list[AIHabitSuggestion],
+    message: str,
+    history: list[ChatMessage],
+) -> tuple[str, list[AIHabitSuggestion]]:
+    from groq import Groq  # lazy import: only needed when narration is enabled
+
+    client = Groq()
+    candidate_lines = "\n".join(
+        f"{c.habit.habitId}: {c.habit.label} — £{c.habit.weeklySaving:.2f}/week, "
+        f"{c.habit.kind}, category {c.habit.categoryId}. {c.explanation}"
+        for c in candidates
+    )
+    # A single "user" message, not multi-turn system+history: gpt-oss-20b on
+    # Groq intermittently mis-emits a tool-call wrapper around plain text
+    # when given a system role plus conversation history, which the server
+    # then rejects with "Tool choice is none, but model called a tool" even
+    # though no tools were ever defined — reproduced during testing. Folding
+    # everything into one message, the same pattern narrate_plan_groq() uses
+    # successfully, avoids that path entirely.
+    history_lines = "\n".join(
+        f"{'User' if m.role != 'assistant' else 'You'}: {m.content}" for m in history[-6:]
+    )
+    prompt = (
+        f"You are helping {profile.displayName} choose which habit suggestions to focus on "
+        f"for their '{goal.label}' savings goal. You may ONLY recommend habits from this exact "
+        f"candidate list — never invent a new habit, category, or £ figure:\n\n{candidate_lines}\n\n"
+        + (f"Conversation so far:\n{history_lines}\n\n" if history_lines else "")
+        + f"User's new message: \"{message}\"\n\n"
+        f"When the user asks to change, swap, remove, or focus the suggestions, pick the best "
+        f"matching habits from the list above (max 3, ordered by relevance to their request). "
+        f"If nothing in the list matches what they're asking for, say so plainly instead of "
+        f"picking an unrelated one. Never say 'you should' or give financial advice — frame "
+        f"things as 'if you did X, this would happen'. Reply in EXACTLY this two-line format, "
+        f"nothing else, no markdown:\n"
+        f"REPLY: <one short, warm sentence, max 30 words>\n"
+        f"HABIT_IDS: <comma-separated habitIds from the list above, 1-3 of them, or NONE>"
+    )
+
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        max_tokens=300,
+        reasoning_effort="low",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    content = response.choices[0].message.content or ""
+    reply, habit_ids = _parse_chat_reply(content)
+    if not reply:
+        raise RuntimeError("Groq returned no chat content")
+
+    by_id = {c.habit.habitId: c for c in candidates}
+    picked = [by_id[h] for h in habit_ids if h in by_id]
+    if not picked:
+        picked = candidates[:3]
+    return reply, picked
+
+
+def _parse_chat_reply(content: str) -> tuple[str, list[str]]:
+    reply = ""
+    habit_ids: list[str] = []
+    for line in content.splitlines():
+        line = line.strip()
+        if line.upper().startswith("REPLY:"):
+            reply = line.split(":", 1)[1].strip()
+        elif line.upper().startswith("HABIT_IDS:"):
+            raw = line.split(":", 1)[1].strip()
+            if raw.upper() != "NONE":
+                habit_ids = [h.strip() for h in raw.split(",") if h.strip()]
+    return reply, habit_ids

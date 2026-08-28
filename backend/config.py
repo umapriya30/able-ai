@@ -9,7 +9,7 @@ class Settings:
     # "work with the laptop in flight mode" — the deterministic engine above
     # is always what the numbers come from, this only ever adds a narrated
     # paragraph on top of numbers the engine already computed.
-    ai_narration_enabled: bool = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    ai_narration_enabled: bool = bool(os.environ.get("GROQ_API_KEY"))
 
 
 settings = Settings()

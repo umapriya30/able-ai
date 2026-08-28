@@ -42,6 +42,8 @@ export type IconName =
   | "goals"
   | "habits"
   | "you"
+  | "settings"
+  | "plus"
   | "coffee"
   | "eating_out"
   | "subs"
@@ -94,6 +96,21 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
       return (
         <Wrap size={size}>
           <polygon points={starPoints(12, 12, 8, 3.4, 5)} />
+        </Wrap>
+      );
+    case "settings":
+      // The dial from design board 04 — a control you turn, not a cog.
+      return (
+        <Wrap size={size}>
+          <circle cx="12" cy="12" r="3.6" />
+          <circle cx="12" cy="12" r="8.6" />
+          <path d="M12 1.2v2.4M12 20.4v2.4M1.2 12h2.4M20.4 12h2.4" />
+        </Wrap>
+      );
+    case "plus":
+      return (
+        <Wrap size={size}>
+          <path d="M12 5v14M5 12h14" />
         </Wrap>
       );
     case "coffee":
@@ -157,22 +174,14 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
         </Wrap>
       );
     case "mark":
-      // the brandmark: a rail, and a marker that has moved.
+      // The product's own device at icon scale: a rail, a goalpost, and the
+      // marker sitting *on* it. It previously drew the marker at x=8 with the
+      // post at x=15 — a marker still short of the goal, on the button that
+      // declares arrival. Same coordinate for both is the whole meaning.
       return (
-        <svg
-          width={18}
-          height={18}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          aria-hidden="true"
-        >
-          <line x1="3" y1="16" x2="21" y2="16" />
-          <circle cx="8" cy="16" r="3" />
-          <line x1="15" y1="8" x2="15" y2="16" />
-        </svg>
+        <Wrap size={size}>
+          <path d="M4 12.5l5 5L20 6.5" />
+        </Wrap>
       );
     default:
       return (

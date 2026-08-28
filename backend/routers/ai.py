@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 
 import store
-from ai_habits import generate_ai_habits, llm_narration_available, narrate_plan
-from models import AIHabitSuggestion
+from ai_habits import chat_about_habits, generate_ai_habits, llm_narration_available, narrate_plan
+from models import AIChatRequest, AIChatResponse, AIHabitSuggestion
 
 router = APIRouter(tags=["ai"])
 
@@ -45,3 +45,16 @@ def narrate(profile_id: str, goal_id: str) -> dict[str, str]:
     ticked = store.TICKED_HABITS.get(profile_id, set())
     suggestions = generate_ai_habits(store.PAYLOAD, profile, goal, target, ideal, ticked_habit_ids=ticked)
     return {"narration": narrate_plan(profile, goal, suggestions)}
+
+
+@router.post("/profiles/{profile_id}/ai-habits/{goal_id}/chat", response_model=AIChatResponse)
+def chat(profile_id: str, goal_id: str, body: AIChatRequest) -> AIChatResponse:
+    profile = _profile_or_404(profile_id)
+    goal = _goal_or_404(profile, goal_id)
+    label, target, ideal = store.effective_goal_fields(goal)
+    ticked = store.TICKED_HABITS.get(profile_id, set())
+    reply, suggestions = chat_about_habits(
+        store.PAYLOAD, profile, goal, target, ideal,
+        ticked_habit_ids=ticked, message=body.message, history=body.history,
+    )
+    return AIChatResponse(reply=reply, suggestions=suggestions)

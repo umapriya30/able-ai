@@ -121,12 +121,63 @@ def effective_goal_fields(goal) -> tuple[str, float, float]:
     return label, target, ideal_months
 
 
+def effective_target_date(goal) -> str | None:
+    """The calendar date the user picked for this goal, if they used the date
+    control rather than the months slider. Display only — idealTimeframeMonths
+    (set from this date at write time) is what the engine reads."""
+    override = GOAL_OVERRIDES.get(goal.goalId)
+    if override and override.targetDate is not None:
+        return override.targetDate
+    return goal.targetDate
+
+
 def effective_saved(goal) -> float:
     """The goal's saved amount, unless it's been marked reached this session
     (see routers/profiles.py complete_goal) — same override pattern as
     effective_goal_fields, kept separate because saved changes on a
     different trigger (completion) than label/target/timeframe edits."""
     return GOAL_SAVED_OVERRIDES.get(goal.goalId, goal.saved)
+
+
+# The two goals the design boards show on Maya's dashboard: one comfortably
+# ahead, one honestly out of reach. Session-only, appended through the same
+# path a user would use, so the payload file stays the source of truth and the
+# baked-in g_deposit (which the tests reference by id) is left alone.
+DEMO_GOALS = [
+    {
+        "goalId": "g_house_deposit",
+        "label": "House deposit",
+        "emoji": "\U0001F3E0",
+        "targetAmount": 13000.0,
+        "saved": 0.0,
+        "idealTimeframeMonths": 15,
+    },
+    {
+        "goalId": "g_sneakers",
+        "label": "Sneakers",
+        "emoji": "\U0001F45F",
+        "targetAmount": 180.0,
+        "saved": 112.0,
+        "idealTimeframeMonths": 1.6,
+    },
+]
+
+
+def seed_demo_goals(profile_id: str = "u_maya") -> int:
+    """Idempotent — adds any missing demo goal, never duplicates one."""
+    profile = get_profile(profile_id)
+    if profile is None:
+        return 0
+    from models import Goal
+
+    existing = {g.goalId for g in profile.goals}
+    added = 0
+    for spec in DEMO_GOALS:
+        if spec["goalId"] in existing:
+            continue
+        profile.goals.append(Goal(createdAt="2026-08-20T00:00:00Z", **spec))
+        added += 1
+    return added
 
 
 def today_month_key() -> str:

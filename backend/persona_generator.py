@@ -20,6 +20,7 @@ def generate_profile(display_name: str, payload: Payload) -> Profile:
     data["displayName"] = display_name.strip() or "Guest"
     data["age"] = max(18, min(25, template.age + random.randint(-3, 3)))
     data["bankId"] = random.choice(payload.banks).bankId
+    data["linkedBankIds"] = [data["bankId"]]
 
     data["income"]["monthlyNet"] = jitter(template.income.monthlyNet)
 
@@ -74,6 +75,7 @@ def build_signup_profile(signup: SignupRequest, payload: Payload) -> Profile:
         ageBand=template.ageBand,
         persona=signup.persona,
         bankId=signup.bankId,
+        linkedBankIds=[signup.bankId],
         accounts=[{
             "accountId": f"acc_{user_id.removeprefix('u_')}_current",
             "type": "current",

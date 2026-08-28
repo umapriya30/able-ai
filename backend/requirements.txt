@@ -4,3 +4,4 @@ pydantic>=2.13
 python-multipart>=0.0.20
 pytest>=8.3
 httpx>=0.28
+groq>=0.11

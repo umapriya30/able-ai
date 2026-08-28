@@ -2,7 +2,7 @@ import math
 import random
 from datetime import date
 
-from models import Goal, Points, Profile, SavingsHistoryPoint, TimelineResult
+from models import Goal, HabitLibraryEntry, Points, Profile, SavingsHistoryPoint, TimelineResult
 
 # Contract constant — docs/03-engineering-handoff.md: "4.345 (not 4) matters;
 # at 4 the numbers drift enough that a judge doing mental arithmetic catches
@@ -134,6 +134,72 @@ def compute_savings_history(
         SavingsHistoryPoint(weekLabel="This week", amount=current_weekly, spent=current_spend, isCurrent=True)
     )
     return points
+
+
+DAYS_PER_MONTH = WEEKS_PER_MONTH * 7  # 30.415 — same constant, expressed in days
+
+
+def months_from_target_date(target_date: str, today: date | None = None) -> float:
+    """Calendar date -> idealTimeframeMonths, for the goal screen's second
+    timeframe control (months slider OR pick a date). Converted here rather
+    than stored as a date because every downstream figure — idealWeeks,
+    onTrack, the rail's "Your date" tick — is already expressed in months, and
+    two sources of truth for the same deadline is how they drift apart.
+
+    Floored at 0.25 months (about a week): a date picked for tomorrow is a
+    tight goal, not a divide-by-zero.
+    """
+    target = date.fromisoformat(target_date[:10])
+    days = (target - (today or date.today())).days
+    return max(0.25, round(days / DAYS_PER_MONTH, 2))
+
+
+def explain_habit(profile: Profile, habit: HabitLibraryEntry) -> str:
+    """The dropdown under a habit row: where the AI found this money, in the
+    user's own figures. Stated as arithmetic on their spending, never as
+    advice — no "you should", no product, no rate (docs/03 §3.5).
+    """
+    monthly = habit.weeklySaving * WEEKS_PER_MONTH
+    category = next(
+        (c for c in profile.spending.categories if c.categoryId == habit.categoryId), None
+    )
+
+    if category is not None:
+        return (
+            f"You currently spend £{category.monthly:.0f}/month on {category.label.lower()}. "
+            f"This frees up £{monthly:.0f}/month — £{habit.weeklySaving:.2f} a week toward the goal."
+        )
+
+    if habit.kind == "productive":
+        leftover = profile.income.monthlyNet - profile.spending.monthlyTotal - profile.savings.monthlyAverage
+        if habit.categoryId == "idle_cash" and leftover > 0:
+            return (
+                f"£{leftover:.0f}/month is still sitting in your current account after spending "
+                f"and saving. This moves £{monthly:.0f} of it across before the next month starts."
+            )
+        if habit.categoryId == "roundups":
+            return (
+                f"You make about £{profile.spending.monthlyTotal:.0f}/month of card payments. "
+                f"Rounding each one up comes to roughly £{monthly:.0f}/month."
+            )
+        return (
+            f"£{monthly:.0f}/month moved on payday, before the rest of the month reaches it — "
+            f"£{habit.weeklySaving:.2f} a week toward the goal."
+        )
+
+    return f"Adds £{habit.weeklySaving:.2f} a week — £{monthly:.0f}/month toward the goal."
+
+
+def spend_save_split(profile: Profile, period_days: int = 30) -> tuple[float, float]:
+    """Exact £ spent vs £ saved over the period, for the dashboard donut.
+    Scaled off the payload's own monthly figures rather than invented per-day
+    transactions, so the two segments always add up to what the rest of the
+    app shows."""
+    scale = period_days / DAYS_PER_MONTH
+    return (
+        round(profile.spending.monthlyTotal * scale, 2),
+        round(profile.savings.monthlyAverage * scale, 2),
+    )
 
 
 def month_key(d: date) -> str:

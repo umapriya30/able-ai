@@ -23,6 +23,17 @@ import type {
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+// loca.lt tunnels show an HTML interstitial to first-time visitor IPs unless
+// this header is present, which would otherwise break every JSON response.
+// Shadows the global `fetch` for calls in this module only.
+const globalFetch = globalThis.fetch;
+function fetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  return globalFetch(input, {
+    ...init,
+    headers: { "Bypass-Tunnel-Reminder": "true", ...init.headers },
+  });
+}
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -102,6 +113,11 @@ export const api = {
   narratePlan: (profileId: string, goalId: string) =>
     fetch(`${BASE}/profiles/${profileId}/ai-habits/${goalId}/narrate`, { method: "POST" }).then(
       (r) => json<{ narration: string }>(r)
+    ),
+
+  getAIStatus: () =>
+    fetch(`${BASE}/ai/status`).then((r) =>
+      json<{ narrationAvailable: boolean; llmEnhanced: boolean }>(r)
     ),
 
   seedDemo: () =>

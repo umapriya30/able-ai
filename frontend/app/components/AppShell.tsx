@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { money } from "@/lib/format";
 import type {
+  AIHabitSuggestion,
   Bank,
   HabitEntry,
   HabitLibraryEntry,
@@ -31,6 +32,7 @@ import { LoginScreen } from "./screens/LoginScreen";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
 import { BankLinkScreen } from "./screens/BankLinkScreen";
 import { AnalysingScreen } from "./screens/AnalysingScreen";
+import { AIRecommendScreen } from "./screens/AIRecommendScreen";
 
 const STEPS: { screen: ScreenName; n: string; label: string }[] = [
   { screen: "linking", n: "01", label: "Connect the bank" },
@@ -65,6 +67,11 @@ export function AppShell() {
   const [linkBusy, setLinkBusy] = useState(false);
   const [createBusy, setCreateBusy] = useState(false);
   const [linkError, setLinkError] = useState<string | null>(null);
+
+  const [aiSuggestions, setAiSuggestions] = useState<AIHabitSuggestion[]>([]);
+  const [aiNarration, setAiNarration] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiLlmEnhanced, setAiLlmEnhanced] = useState(false);
 
   const [goalName, setGoalName] = useState("");
   const [goalAmountStr, setGoalAmountStr] = useState("");
@@ -206,6 +213,22 @@ export function AppShell() {
   const goal =
     profile?.goals.find((g) => g.goalId === activeGoalId) ?? profile?.goals[0] ?? null;
 
+  const loadAIRecommendations = useCallback(async (pid: string, goalId: string) => {
+    setAiLoading(true);
+    try {
+      const [suggestions, narrated, status] = await Promise.all([
+        api.getAIHabits(pid, goalId),
+        api.narratePlan(pid, goalId),
+        api.getAIStatus(),
+      ]);
+      setAiSuggestions(suggestions);
+      setAiNarration(narrated.narration);
+      setAiLlmEnhanced(status.llmEnhanced);
+    } finally {
+      setAiLoading(false);
+    }
+  }, []);
+
   const openGoal = async (goalId: string) => {
     if (!personaId) return;
     setActiveGoalId(goalId);
@@ -223,7 +246,15 @@ export function AppShell() {
     setTimeline(tl);
     setSavingsHistory(hist);
     setGoalTimelines((prev) => ({ ...prev, [goalId]: tl }));
-    setScreen("breakdown");
+    setScreen("ai-recommend");
+    loadAIRecommendations(personaId, goalId);
+  };
+
+  const onToggleAIHabit = async (habitId: string) => {
+    await onToggleHabit(habitId);
+    if (personaId && goal) {
+      api.getAIHabits(personaId, goal.goalId).then(setAiSuggestions);
+    }
   };
 
   const onLeverChange = (v: number) => {
@@ -569,6 +600,20 @@ export function AppShell() {
                 busy={createBusy}
                 onCreate={onCreateGoal}
                 onCancel={() => setScreen("home")}
+              />
+            )}
+            {screen === "ai-recommend" && (
+              <AIRecommendScreen
+                goalName={goal.label}
+                goalEmoji={goal.emoji}
+                points={points}
+                loading={aiLoading}
+                narration={aiNarration}
+                llmEnhanced={aiLlmEnhanced}
+                suggestions={aiSuggestions}
+                onToggle={onToggleAIHabit}
+                onBack={() => setScreen("home")}
+                onContinue={() => setScreen("breakdown")}
               />
             )}
             {screen === "breakdown" && (

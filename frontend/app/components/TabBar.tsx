@@ -11,7 +11,11 @@ const TABS: { go: ScreenName; icon: IconName; label: string }[] = [
 
 export function TabBar({ current, onGo }: { current: ScreenName; onGo: (s: ScreenName) => void }) {
   const activeTab =
-    current === "newgoal" || current === "whatif" || current === "timeline" || current === "habits"
+    current === "newgoal" ||
+    current === "whatif" ||
+    current === "timeline" ||
+    current === "ai-recommend" ||
+    current === "habits"
       ? "breakdown"
       : current;
   return (

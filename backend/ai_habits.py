@@ -122,7 +122,7 @@ def _ticked_total(payload: Payload, profile: Profile, ticked_habit_ids: set[str]
 def ai_narration_available() -> bool:
     """Narration itself is always available — see narrate_plan_template()
     below. This flag now reports whether the *LLM-upgraded* prose is active
-    (requires ANTHROPIC_API_KEY); the template fallback needs no key, no
+    (requires GROQ_API_KEY); the template fallback needs no key, no
     network, and no external account, so the feature never has to be
     switched off for a demo running without one."""
     return True
@@ -135,7 +135,7 @@ def llm_narration_available() -> bool:
 def narrate_plan(profile: Profile, goal: Goal, suggestions: list[AIHabitSuggestion]) -> str:
     """Narrate the already-computed suggestions as one warm paragraph.
 
-    Uses the real LLM when ANTHROPIC_API_KEY is set; otherwise falls back to
+    Uses the real LLM when GROQ_API_KEY is set; otherwise falls back to
     a deterministic template that reads the same numbers. Either way the
     figures themselves always come from generate_ai_habits() above, never
     from the model — this can never introduce an unverified figure or cross
@@ -143,7 +143,7 @@ def narrate_plan(profile: Profile, goal: Goal, suggestions: list[AIHabitSuggesti
     """
     if settings.ai_narration_enabled:
         try:
-            return narrate_plan_llm(profile, goal, suggestions)
+            return narrate_plan_groq(profile, goal, suggestions)
         except Exception:
             pass  # network/key trouble on stage shouldn't break the demo
     return narrate_plan_template(profile, goal, suggestions)
@@ -182,19 +182,19 @@ def narrate_plan_template(profile: Profile, goal: Goal, suggestions: list[AIHabi
     )
 
 
-def narrate_plan_llm(profile: Profile, goal: Goal, suggestions: list[AIHabitSuggestion]) -> str:
+def narrate_plan_groq(profile: Profile, goal: Goal, suggestions: list[AIHabitSuggestion]) -> str:
     """The LLM-upgraded version of narrate_plan_template(), used only when
-    ANTHROPIC_API_KEY is set. Only called when narration is enabled — the
+    GROQ_API_KEY is set. Only called when narration is enabled — the
     numbers themselves always come from generate_ai_habits() above, never
     from the model, so this can never introduce an unverified figure or
     cross into "advice" framing.
     """
     if not settings.ai_narration_enabled:
-        raise RuntimeError("AI narration is not enabled — set ANTHROPIC_API_KEY to turn it on.")
+        raise RuntimeError("AI narration is not enabled — set GROQ_API_KEY to turn it on.")
 
-    import anthropic  # lazy import: only needed when narration is enabled
+    from groq import Groq  # lazy import: only needed when narration is enabled
 
-    client = anthropic.Anthropic()
+    client = Groq()
     habit_lines = "\n".join(
         f"- {s.habit.label} (£{s.habit.weeklySaving:.2f}/week, {s.rationale})"
         for s in suggestions
@@ -207,9 +207,16 @@ def narrate_plan_llm(profile: Profile, goal: Goal, suggestions: list[AIHabitSugg
         f"as 'if you did X, this would happen'. Do not mention interest rates, investments, "
         f"or any regulated financial product.\n\n{habit_lines}"
     )
-    response = client.messages.create(
-        model="claude-sonnet-5",
-        max_tokens=200,
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        max_tokens=400,
+        # Without this, gpt-oss-20b can spend its entire token budget on hidden
+        # reasoning and return empty content (finish_reason="length", 0 visible
+        # output) — reproduced with the real 3-habit prompt during testing.
+        reasoning_effort="low",
         messages=[{"role": "user", "content": prompt}],
     )
-    return response.content[0].text
+    content = response.choices[0].message.content
+    if not content:
+        raise RuntimeError("Groq returned no narration content")
+    return content

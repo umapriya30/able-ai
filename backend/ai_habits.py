@@ -34,6 +34,26 @@ from logic import WEEKS_PER_MONTH, compute_timeline, explain_habit
 from models import AIHabitSuggestion, ChatMessage, Goal, HabitLibraryEntry, Payload, Profile
 
 
+def curated_habits_for_profile(payload: Payload, profile: Profile) -> list[HabitLibraryEntry]:
+    """The curated habitLibrary entries this profile could see, anywhere in
+    the app (Action Center, AI recommendations) — persona match, and never a
+    reductive habit targeting a category this profile's own data marks
+    non-discretionary (essential). That second rule was previously only
+    enforced for *generated* candidates in generate_ai_habits() below, so a
+    curated entry could bypass it: h_walk suggests skipping the bus, but
+    transport is essential for every profile in the payload (so is h_fuel's
+    fuel_transport for gig workers) — cutting an essential cost isn't a
+    habit suggestion, it's pressure to skip something needed.
+    """
+    essential_categories = {c.categoryId for c in profile.spending.categories if not c.discretionary}
+    return [
+        h
+        for h in payload.habitLibrary
+        if profile.persona in h.personas
+        and not (h.kind == "reductive" and h.categoryId in essential_categories)
+    ]
+
+
 def generate_ai_habits(
     payload: Payload,
     profile: Profile,
@@ -43,9 +63,7 @@ def generate_ai_habits(
     ticked_habit_ids: set[str],
     max_habits: int = 3,
 ) -> list[AIHabitSuggestion]:
-    curated = [
-        h for h in payload.habitLibrary if profile.persona in h.personas
-    ]
+    curated = curated_habits_for_profile(payload, profile)
     curated_categories = {h.categoryId for h in curated}
 
     candidates: list[HabitLibraryEntry] = list(curated)

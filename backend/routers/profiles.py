@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 
 import store
+from ai_habits import curated_habits_for_profile
 from logic import (
     award_goal_completion,
     compute_savings_history,
@@ -126,7 +127,7 @@ def signup(payload: SignupRequest) -> LoginResponse:
     if payload.initialHabitIds or payload.customHabits:
         ticked = store.TICKED_HABITS[new_profile.userId]
         points = store.POINTS[new_profile.userId]
-        curated = {h.habitId: h for h in store.PAYLOAD.habitLibrary if new_profile.persona in h.personas}
+        curated = {h.habitId: h for h in curated_habits_for_profile(store.PAYLOAD, new_profile)}
         for habit_id in payload.initialHabitIds:
             habit = curated.get(habit_id)
             if habit and habit_id not in ticked:
@@ -375,7 +376,7 @@ def get_habits(profile_id: str, goal_id: str | None = None) -> list[HabitEntry]:
     dropdown shows, computed from this profile's own spending."""
     profile = _profile_or_404(profile_id)
     ticked = store.TICKED_HABITS.get(profile_id, set())
-    curated = [h for h in store.PAYLOAD.habitLibrary if profile.persona in h.personas]
+    curated = curated_habits_for_profile(store.PAYLOAD, profile)
     custom = store.CUSTOM_HABITS.get(profile_id, [])
     habits = [*curated, *custom]
     habits.sort(key=lambda h: h.kind == "productive")  # stable: preserves library order within each kind

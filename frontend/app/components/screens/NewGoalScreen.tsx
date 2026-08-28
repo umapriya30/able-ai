@@ -6,7 +6,9 @@ import { money, money2 } from "@/lib/format";
 
 const WEEKS_PER_MONTH = 4.345;
 const EMOJI = ["🏠", "👟", "✈️", "🎓", "🚗", "🎁"];
-const SLIDER_TICKS = [3, 6, 12, 18, 24, 36];
+// The equivalent-weeks marks of the old month ticks [3,6,12,18,24,36] —
+// weeks is the primary unit now, months is derived for display only.
+const SLIDER_TICKS_WEEKS = [13, 26, 52, 78, 104, 156];
 
 // Read once at module load rather than during render: Date.now() in a render
 // path is impure and makes the derived week count unstable across re-renders.
@@ -42,8 +44,8 @@ export function NewGoalScreen({
   const [label, setLabel] = useState("");
   const [emoji, setEmoji] = useState(EMOJI[0]);
   const [amount, setAmount] = useState(0);
-  const [mode, setMode] = useState<"months" | "date">("months");
-  const [months, setMonths] = useState(12);
+  const [mode, setMode] = useState<"weeks" | "date">("weeks");
+  const [weeks, setWeeks] = useState(52);
   const [date, setDate] = useState(() => isoPlusMonths(12));
 
   // The first read on their spending, at the rate the account already saves
@@ -57,8 +59,8 @@ export function NewGoalScreen({
 
   const dateMonths = useMemo(() => monthsUntil(date), [date]);
 
-  const chosenMonths = mode === "months" ? months : dateMonths;
-  const idealWeeks = Math.round(chosenMonths * WEEKS_PER_MONTH);
+  const chosenMonths = mode === "weeks" ? weeks / WEEKS_PER_MONTH : dateMonths;
+  const idealWeeks = mode === "weeks" ? weeks : Math.round(dateMonths * WEEKS_PER_MONTH);
   const neededWeekly = idealWeeks > 0 ? amount / idealWeeks : 0;
   const affordable = weeksAtBaseline !== null && weeksAtBaseline <= idealWeeks;
 
@@ -67,7 +69,7 @@ export function NewGoalScreen({
       label: label.trim() || "New goal",
       emoji,
       targetAmount: amount,
-      ...(mode === "months" ? { idealTimeframeMonths: months } : { targetDate: date }),
+      ...(mode === "weeks" ? { idealTimeframeMonths: chosenMonths } : { targetDate: date }),
     });
 
   if (step === 1) {
@@ -157,34 +159,34 @@ export function NewGoalScreen({
       </div>
 
       <div className="seg">
-        <button aria-pressed={mode === "months"} onClick={() => setMode("months")}>
-          In months
+        <button aria-pressed={mode === "weeks"} onClick={() => setMode("weeks")}>
+          In weeks
         </button>
         <button aria-pressed={mode === "date"} onClick={() => setMode("date")}>
           On a date
         </button>
       </div>
 
-      {mode === "months" ? (
+      {mode === "weeks" ? (
         <div className="card col" style={{ gap: 20 }}>
           <div className="row" style={{ justifyContent: "flex-start", alignItems: "flex-end", gap: 10 }}>
-            <span className="num months-fig tnum">{months}</span>
+            <span className="num months-fig tnum">{weeks}</span>
             <span className="eyebrow" style={{ paddingBottom: 8 }}>
-              months · {idealWeeks} weeks
+              weeks · {chosenMonths.toFixed(1)} months
             </span>
           </div>
           <input
             className="slider"
             type="range"
             min={1}
-            max={36}
+            max={156}
             step={1}
-            value={months}
-            onChange={(e) => setMonths(Number(e.target.value))}
-            aria-label="Months to save"
+            value={weeks}
+            onChange={(e) => setWeeks(Number(e.target.value))}
+            aria-label="Weeks to save"
           />
           <div className="row eyebrow tnum" style={{ gap: 0 }}>
-            {SLIDER_TICKS.map((t) => (
+            {SLIDER_TICKS_WEEKS.map((t) => (
               <span key={t}>{t}</span>
             ))}
           </div>

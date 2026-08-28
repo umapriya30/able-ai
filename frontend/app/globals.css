@@ -19,6 +19,30 @@
   --on-lime: #0c2321;
   --shadow: 0 1px 2px rgba(12, 35, 33, 0.06), 0 8px 24px -12px rgba(12, 35, 33, 0.22);
 
+  /* Glass: --card at reduced alpha over the aurora field below. 0.66 is as
+     transparent as the aurora allows while --muted (the weakest text pair,
+     12px) still clears 4.5:1 — measured at 5.05:1 light, 5.89:1 dark. The
+     figure only holds because the aurora is a low tint; drop a saturated
+     lime or momentum fill directly behind glass and it fails, which is why
+     nothing scrolls underneath these surfaces. */
+  --glass: rgba(255, 255, 255, 0.66);
+  /* The lit top edge. Glass reads as glass because of the edge, not the blur —
+     without it a translucent panel just looks like a faded card. */
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  /* Aurora: the field the glass refracts. Built only from product tokens, at
+     tints low enough that text on glass above it still clears 4.5:1 (measured
+     worst pair: --muted at 5.05:1 light, 5.89:1 dark). */
+  --aurora-1: rgba(14, 159, 110, 0.18);
+  --aurora-2: rgba(200, 241, 53, 0.16);
+  --aurora-3: rgba(180, 114, 26, 0.1);
+  /* Kept as tokens: the celebration scrim uses them, and any future surface
+     that genuinely floats over content should reach for these rather than
+     inventing its own translucency. */
+  --glass-line: rgba(12, 35, 33, 0.1);
+  --glass-blur: 14px;
+  --glass-blur-bar: 20px;
+  --glass-cel: rgba(8, 17, 15, 0.86);
+
   --display: var(--font-bricolage), Georgia, serif;
   --ui: var(--font-hanken), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -58,6 +82,12 @@
     --line: #22352f;
     --rail: #2c423b;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -14px rgba(0, 0, 0, 0.7);
+    --glass: rgba(18, 33, 30, 0.66);
+    --glass-line: rgba(233, 241, 237, 0.1);
+    --glass-edge: rgba(233, 241, 237, 0.16);
+    --aurora-1: rgba(47, 191, 139, 0.22);
+    --aurora-2: rgba(200, 241, 53, 0.14);
+    --aurora-3: rgba(217, 154, 61, 0.12);
   }
 }
 :root[data-theme="dark"] {
@@ -76,6 +106,12 @@
   --line: #22352f;
   --rail: #2c423b;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -14px rgba(0, 0, 0, 0.7);
+  --glass: rgba(18, 33, 30, 0.66);
+  --glass-edge: rgba(233, 241, 237, 0.16);
+  --aurora-1: rgba(47, 191, 139, 0.22);
+  --aurora-2: rgba(200, 241, 53, 0.14);
+  --aurora-3: rgba(217, 154, 61, 0.12);
+  --glass-line: rgba(233, 241, 237, 0.1);
 }
 
 * {
@@ -187,6 +223,46 @@ p {
   background: var(--ink);
   color: var(--ground);
 }
+/* Run of show. Presenter chrome, not product — but it is on screen for the
+   whole demo, so it follows the same mono/ink vocabulary as the phone. */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.steps button {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-ctl);
+  text-align: left;
+  font-size: 14px;
+  color: var(--muted);
+  transition: background 0.16s ease, color 0.16s ease;
+}
+.steps button:hover {
+  background: var(--card-2);
+  color: var(--ink);
+}
+.steps button[aria-current="true"] {
+  background: var(--card-2);
+  color: var(--ink);
+  font-weight: 600;
+}
+.steps .n {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.steps button[aria-current="true"] .n {
+  color: var(--momentum-ink);
+}
+
 .rail-actions {
   display: flex;
   gap: var(--sp-2);
@@ -220,7 +296,7 @@ p {
 .phone {
   width: 390px;
   height: 844px;
-  background: var(--card);
+  background: var(--ground);
   border-radius: var(--r-phone);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
@@ -244,10 +320,30 @@ p {
   font-size: 12px;
   color: var(--muted);
 }
+/* The aurora sits behind every screen and never scrolls, so each frosted panel
+   refracts a different part of it as content moves. Three blobs, all from
+   product tokens: momentum top-left (the colour progress lives in), lime
+   top-right (reward), slip low-centre (the honest warning). Static — a drifting
+   gradient would burn GPU for the whole demo and carry no information. */
+.phone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 42% at 12% 6%, var(--aurora-1), transparent 70%),
+    radial-gradient(52% 38% at 92% 20%, var(--aurora-2), transparent 72%),
+    radial-gradient(64% 44% at 46% 96%, var(--aurora-3), transparent 74%);
+}
+.status,
+.viewport,
+.tabs {
+  position: relative;
+  z-index: 1;
+}
 .viewport {
   flex: 1;
   overflow: hidden;
-  position: relative;
 }
 /* Only the active screen is ever mounted (React conditional render), so the CSS just
    needs to fill the viewport and animate in on mount — no display toggling needed. */
@@ -307,11 +403,48 @@ p {
 .tiny {
   font-size: 12px;
 }
+/* Frosted surfaces. One elevation token still does all the depth work — the
+   edge is a border, not a second shadow. */
+.card,
+.goalcard,
+.tiers.card,
+.habits,
+.seg {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid var(--glass-line);
+  border-top-color: var(--glass-edge);
+}
 .card {
-  background: var(--card);
   border-radius: var(--r-card);
   box-shadow: var(--shadow);
   padding: var(--sp-4);
+}
+/* Two fallbacks, because a see-through panel with no blur is unreadable:
+   browsers without backdrop-filter, and users who ask for less transparency. */
+@supports not (backdrop-filter: blur(1px)) {
+  .card,
+  .goalcard,
+  .tiers.card,
+  .habits,
+  .seg,
+  .tabs,
+  .celebrate {
+    background: var(--card);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .card,
+  .goalcard,
+  .tiers.card,
+  .habits,
+  .seg,
+  .tabs {
+    background: var(--card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 .row {
   display: flex;
@@ -328,6 +461,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   width: 100%;
   min-height: 56px;
   background: var(--ink);
@@ -799,7 +933,6 @@ p {
 .habits {
   display: flex;
   flex-direction: column;
-  background: var(--card);
   border-radius: var(--r-card);
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -817,6 +950,8 @@ p {
 }
 .habit-block[data-done="true"] {
   background: var(--momentum-soft);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 .habit-block:hover .habit-label {
   color: var(--momentum-ink);
@@ -1311,10 +1446,18 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ---------- tabs ---------- */
+/* In flow, not overlaying — the boards specify a 64px band below the content
+   (flex:none), and floating it cost more than the blur was worth: it steals
+   56px from every 844px screen, which pushed screens that previously fit
+   into a scroll and left the primary CTA 16px under the bar at rest.
+   Glass needs something behind it; here there is nothing. */
 .tabs {
   display: flex;
-  border-top: 1px solid var(--line);
-  background: var(--card);
+  flex: none;
+  border-top: 1px solid var(--glass-edge);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(var(--glass-blur-bar)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur-bar)) saturate(150%);
 }
 .tabs button {
   flex: 1;
@@ -1330,6 +1473,18 @@ input[type="range"]::-moz-range-thumb {
 }
 .tabs button[aria-current="true"] {
   color: var(--ink);
+}
+/* A 20px optical box for an inline icon, wherever it appears — the tab bar
+   is not the only place one sits next to a label. */
+.glyph {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.glyph svg {
+  display: block;
 }
 .tabs .glyph {
   width: 20px;
@@ -1403,7 +1558,11 @@ input[type="range"]::-moz-range-thumb {
 .celebrate {
   position: absolute;
   inset: 0;
-  background: var(--cel-bg);
+  /* Still a fixed dark stage in both themes (docs/02 §2) — the blur only
+     softens what is behind it, the scrim alpha keeps every contrast pair. */
+  background: var(--glass-cel);
+  -webkit-backdrop-filter: blur(26px) saturate(120%);
+  backdrop-filter: blur(26px) saturate(120%);
   color: var(--cel-fg);
   display: none;
   flex-direction: column;
@@ -1416,6 +1575,11 @@ input[type="range"]::-moz-range-thumb {
 }
 .celebrate {
   overflow-y: auto;
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .celebrate {
+    background: var(--cel-bg);
+  }
 }
 .celebrate[data-open="true"] {
   display: flex;
@@ -1449,11 +1613,21 @@ input[type="range"]::-moz-range-thumb {
   font-size: 44px;
   color: var(--lime);
 }
+/* Lime is the reward colour and carries the primary action alone. The
+   secondary is an outline on the overlay's own ink (board 11) — two lime
+   buttons read as two rewards. */
 .celebrate .btn {
-  background: var(--lime);
-  color: var(--on-lime);
   max-width: 260px;
   position: relative;
+}
+.celebrate .btn-lime {
+  background: var(--lime);
+  color: var(--on-lime);
+}
+.celebrate .btn-onink {
+  background: transparent;
+  border: 1.5px solid var(--cel-fg);
+  color: var(--cel-fg);
 }
 .cap {
   font-size: 14px;

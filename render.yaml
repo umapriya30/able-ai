@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: able-ai-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ALLOWED_ORIGIN
+        value: https://frontend-hazel-two-45.vercel.app
+      - key: DEFAULT_ANNUAL_RETURN_RATE
+        value: "0.0"
+      - key: HABIT_COMPLETION_POINTS
+        value: "10"
+      - key: GOAL_BONUS_POINTS
+        value: "100"
+      - key: GROQ_API_KEY
+        sync: false
